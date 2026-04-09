@@ -1,0 +1,19 @@
+FROM golang:1.26.2-alpine AS builder
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/stock-service ./cmd/stock-service
+
+FROM alpine:3.22
+
+WORKDIR /app
+COPY --from=builder /bin/stock-service /usr/local/bin/stock-service
+
+EXPOSE 8081
+
+CMD ["stock-service"]
+

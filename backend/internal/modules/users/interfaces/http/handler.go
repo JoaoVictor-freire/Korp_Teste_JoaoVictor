@@ -38,12 +38,14 @@ func (h Handler) Register(c *gin.Context) {
 	}
 
 	user, err := h.register.Execute(c.Request.Context(), application.RegisterInput{
+		Name:     request.Name,
 		Email:    request.Email,
 		Password: request.Password,
 	})
 	if err != nil {
 		switch {
-		case errors.Is(err, application.ErrEmailRequired),
+		case errors.Is(err, application.ErrNameRequired),
+			errors.Is(err, application.ErrEmailRequired),
 			errors.Is(err, application.ErrPasswordRequired):
 			httpx.Error(c, http.StatusBadRequest, err.Error())
 			return

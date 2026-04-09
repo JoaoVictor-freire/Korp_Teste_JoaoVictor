@@ -12,12 +12,14 @@ import (
 )
 
 var (
+	ErrNameRequired     = errors.New("name is required")
 	ErrEmailRequired    = errors.New("email is required")
 	ErrPasswordRequired = errors.New("password is required")
 	ErrUserExists       = errors.New("user already exists")
 )
 
 type RegisterInput struct {
+	Name     string
 	Email    string
 	Password string
 }
@@ -31,6 +33,11 @@ func NewRegisterUseCase(repository domain.UserRepository) RegisterUseCase {
 }
 
 func (uc RegisterUseCase) Execute(ctx context.Context, input RegisterInput) (domain.User, error) {
+	name := strings.TrimSpace(input.Name)
+	if name == "" {
+		return domain.User{}, ErrNameRequired
+	}
+
 	email := strings.ToLower(strings.TrimSpace(input.Email))
 	if email == "" {
 		return domain.User{}, ErrEmailRequired
@@ -55,6 +62,7 @@ func (uc RegisterUseCase) Execute(ctx context.Context, input RegisterInput) (dom
 
 	user := domain.User{
 		ID:           newID(),
+		Name:         name,
 		Email:        email,
 		PasswordHash: string(hash),
 		CreatedAt:    time.Now().UTC(),

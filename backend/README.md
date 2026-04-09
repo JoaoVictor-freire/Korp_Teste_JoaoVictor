@@ -20,6 +20,21 @@ All `/api/v1/*` endpoints (products/invoices) require `Authorization: Bearer <to
 - `chmod +x ./scripts/dev.sh`
 - `./scripts/dev.sh`
 
+## Docker
+
+- Build and run both services: `docker compose up --build`
+- Stock service: `http://localhost:8081`
+- Billing service: `http://localhost:8082`
+- `AUTO_MIGRATE=false` is recommended for remote databases like Supabase. Turn it on only when you want GORM to change the schema automatically.
+
+## Swagger
+
+- Stock service docs: `http://localhost:8081/swagger/index.html`
+- Billing service docs: `http://localhost:8082/swagger/index.html`
+- Raw JSON:
+  - `http://localhost:8081/swagger.json`
+  - `http://localhost:8082/swagger.json`
+
 ## Quick Test (curl)
 
 Health (no auth):
@@ -29,7 +44,7 @@ Health (no auth):
 
 Register/login (stock-service):
 
-- `curl -s -X POST http://localhost:8081/api/v1/auth/register -H 'Content-Type: application/json' -d '{"email":"user_a@example.com","password":"123456"}'`
+- `curl -s -X POST http://localhost:8081/api/v1/auth/register -H 'Content-Type: application/json' -d '{"name":"User A","email":"user_a@example.com","password":"123456"}'`
 - `curl -s -X POST http://localhost:8081/api/v1/auth/login -H 'Content-Type: application/json' -d '{"email":"user_a@example.com","password":"123456"}'`
 
 Create/list products (use the token you got above):
@@ -41,6 +56,10 @@ Create/list invoices (billing-service, same token/secret):
 
 - `curl -s -X POST http://localhost:8082/api/v1/invoices -H 'Content-Type: application/json' -H 'Authorization: Bearer <token>' -d '{"number":1,"items":[{"product_code":"P001","quantity":2}]}'`
 - `curl -s http://localhost:8082/api/v1/invoices -H 'Authorization: Bearer <token>'`
+
+## Database
+
+- The evolved PostgreSQL schema is in `backend/internal/platform/database/schema.sql`
 
 Suggested next steps:
 

@@ -11,7 +11,7 @@ type HTTPConfig struct {
 }
 
 func NewHTTPConfig(prefix string, defaultPort string) HTTPConfig {
-	host := getEnv(prefix+"_HOST", "0.0.0.0")
+	host := getEnv(prefix+"_HOST", "localhost")
 	port := getEnv(prefix+"_PORT", defaultPort)
 
 	return HTTPConfig{
