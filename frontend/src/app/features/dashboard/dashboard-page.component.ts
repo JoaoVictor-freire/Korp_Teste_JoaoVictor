@@ -26,6 +26,10 @@ export class DashboardPageComponent {
   readonly user = this.authService.user;
   readonly products = signal<Product[]>([]);
   readonly invoices = signal<Invoice[]>([]);
+  readonly activeSection = signal<'stock' | 'invoices'>('stock');
+  readonly sidebarOpen = signal(false);
+  readonly invoiceStatusFilter = signal<'ALL' | 'OPEN' | 'CLOSED'>('ALL');
+  readonly selectedInvoiceNumber = signal<number | null>(null);
   readonly pageError = signal('');
   readonly pageNotice = signal('');
   readonly loadingProducts = signal(false);
@@ -37,6 +41,22 @@ export class DashboardPageComponent {
   readonly invoiceCount = computed(() => this.invoices().length);
   readonly openInvoiceCount = computed(() => this.invoices().filter((invoice) => invoice.status === 'OPEN').length);
   readonly hasProducts = computed(() => this.products().length > 0);
+  readonly filteredInvoices = computed(() => {
+    const filter = this.invoiceStatusFilter();
+    if (filter === 'ALL') {
+      return this.invoices();
+    }
+
+    return this.invoices().filter((invoice) => invoice.status === filter);
+  });
+  readonly selectedInvoice = computed(() => {
+    const selectedNumber = this.selectedInvoiceNumber();
+    if (selectedNumber === null) {
+      return this.filteredInvoices()[0] ?? null;
+    }
+
+    return this.filteredInvoices().find((invoice) => invoice.number === selectedNumber) ?? this.filteredInvoices()[0] ?? null;
+  });
 
   readonly productForm = this.fb.nonNullable.group({
     code: ['', [Validators.required]],
@@ -55,6 +75,28 @@ export class DashboardPageComponent {
 
   get invoiceItems(): FormArray {
     return this.invoiceForm.controls.items;
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen.update((open) => !open);
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen.set(false);
+  }
+
+  navigateTo(section: 'stock' | 'invoices'): void {
+    this.activeSection.set(section);
+    this.closeSidebar();
+  }
+
+  setInvoiceFilter(filter: 'ALL' | 'OPEN' | 'CLOSED'): void {
+    this.invoiceStatusFilter.set(filter);
+    this.syncSelectedInvoice();
+  }
+
+  selectInvoice(invoiceNumber: number): void {
+    this.selectedInvoiceNumber.set(invoiceNumber);
   }
 
   addInvoiceItem(): void {
@@ -118,6 +160,7 @@ export class DashboardPageComponent {
       }
       this.pageNotice.set('Nota fiscal criada com sucesso.');
       await this.loadInvoices();
+      this.activeSection.set('invoices');
     } catch (error: any) {
       this.pageError.set(error?.error?.error?.message ?? 'Falha ao criar nota.');
     } finally {
@@ -138,6 +181,15 @@ export class DashboardPageComponent {
     return invoice.number;
   }
 
+  productLabel(code: string): string {
+    const product = this.products().find((item) => item.code === code);
+    if (!product) {
+      return code;
+    }
+
+    return `${product.code} - ${product.description}`;
+  }
+
   private async loadProducts(): Promise<void> {
     try {
       this.loadingProducts.set(true);
@@ -155,6 +207,7 @@ export class DashboardPageComponent {
       this.loadingInvoices.set(true);
       const response = await firstValueFrom(this.invoiceService.list());
       this.invoices.set(response.data);
+      this.syncSelectedInvoice();
     } catch (error: any) {
       this.pageError.set(error?.error?.error?.message ?? 'Falha ao carregar notas.');
     } finally {
@@ -167,5 +220,19 @@ export class DashboardPageComponent {
       product_code: ['', [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
     });
+  }
+
+  private syncSelectedInvoice(): void {
+    const selectedNumber = this.selectedInvoiceNumber();
+    const availableInvoices = this.filteredInvoices();
+
+    if (!availableInvoices.length) {
+      this.selectedInvoiceNumber.set(null);
+      return;
+    }
+
+    if (selectedNumber === null || !availableInvoices.some((invoice) => invoice.number === selectedNumber)) {
+      this.selectedInvoiceNumber.set(availableInvoices[0].number);
+    }
   }
 }

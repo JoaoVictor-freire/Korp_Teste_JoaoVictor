@@ -1,180 +1,288 @@
 <section class="dashboard-shell">
   <header class="topbar">
-    <div>
-      <p class="eyebrow">Painel operacional</p>
-      <h1>Ola, {{ user()?.name || 'usuario' }}</h1>
-      <p class="subtitle">Gerencie usuarios, estoque e notas usando seu backend em Go.</p>
+    <div class="topbar-left">
+      <button type="button" class="menu-button" (click)="toggleSidebar()" aria-label="Abrir menu lateral">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div>
+        <h1>EmiteJa</h1>
+      </div>
     </div>
 
-    <div class="topbar-actions">
-      <button type="button" (click)="logout()">Sair</button>
+    <div class="topbar-right">
+      <div class="user-badge">
+        <span>Usuario</span>
+        <strong>{{ user()?.name || 'usuario' }}</strong>
+      </div>
+      <button type="button" (click)="logout()">Logout</button>
     </div>
   </header>
 
-  @if (pageError()) {
-    <p class="message error">{{ pageError() }}</p>
-  }
+  <div class="dashboard-body">
+    <div class="sidebar-backdrop" [class.open]="sidebarOpen()" (click)="closeSidebar()"></div>
 
-  @if (pageNotice()) {
-    <p class="message success">{{ pageNotice() }}</p>
-  }
-
-  <section class="metrics">
-    <article>
-      <span>Produtos</span>
-      <strong>{{ productCount() }}</strong>
-    </article>
-    <article>
-      <span>Notas</span>
-      <strong>{{ invoiceCount() }}</strong>
-    </article>
-    <article>
-      <span>Notas abertas</span>
-      <strong>{{ openInvoiceCount() }}</strong>
-    </article>
-  </section>
-
-  <section class="workspace">
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Cadastrar produto</h2>
-          <p>Crie itens do estoque que depois podem aparecer nas notas.</p>
-        </div>
+    <aside class="sidebar" [class.open]="sidebarOpen()">
+      <div class="sidebar-header">
+        <strong>Navegacao</strong>
+        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="Fechar menu">×</button>
       </div>
 
-      <form class="stack-form" [formGroup]="productForm" (ngSubmit)="submitProduct()">
-        <label>
-          <span>Codigo</span>
-          <input type="text" formControlName="code" placeholder="P001" />
-        </label>
-        <label>
-          <span>Descricao</span>
-          <input type="text" formControlName="description" placeholder="Caneta azul" />
-        </label>
-        <label>
-          <span>Saldo</span>
-          <input type="number" formControlName="stock" min="0" />
-        </label>
-        <button type="submit" [disabled]="savingProduct()">
-          {{ savingProduct() ? 'Salvando...' : 'Salvar produto' }}
+      <nav class="sidebar-nav" aria-label="Ferramentas">
+        <button type="button" [class.active]="activeSection() === 'stock'" (click)="navigateTo('stock')">
+          <span>Estoque</span>
+          <small>{{ productCount() }} produtos</small>
         </button>
-      </form>
-    </div>
+        <button type="button" [class.active]="activeSection() === 'invoices'" (click)="navigateTo('invoices')">
+          <span>Notas</span>
+          <small>{{ invoiceCount() }} notas</small>
+        </button>
+      </nav>
+    </aside>
 
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Criar nota</h2>
-          <p>Monte uma nota fiscal aberta com numeracao e itens.</p>
-        </div>
-      </div>
+    <main class="dashboard-content">
+      @if (pageError()) {
+        <p class="message error">{{ pageError() }}</p>
+      }
 
-      <form class="stack-form" [formGroup]="invoiceForm" (ngSubmit)="submitInvoice()">
-        <label>
-          <span>Numeracao</span>
-          <input type="number" formControlName="number" min="1" />
-        </label>
+      @if (pageNotice()) {
+        <p class="message success">{{ pageNotice() }}</p>
+      }
 
-        @if (!hasProducts()) {
-          <p class="empty note-empty">Cadastre um produto no estoque para habilitar a criacao de notas.</p>
-        }
+      <section class="metrics">
+        <article>
+          <span>Produtos</span>
+          <strong>{{ productCount() }}</strong>
+        </article>
+        <article>
+          <span>Notas</span>
+          <strong>{{ invoiceCount() }}</strong>
+        </article>
+        <article>
+          <span>Notas abertas</span>
+          <strong>{{ openInvoiceCount() }}</strong>
+        </article>
+      </section>
 
-        <div class="items" formArrayName="items">
-          @for (item of invoiceItems.controls; track $index) {
-            <div class="item-row" [formGroupName]="$index">
-              <label>
-                <span>Produto</span>
-                <select formControlName="product_code">
-                  <option value="">Selecione um produto</option>
+      @if (activeSection() === 'stock') {
+        <section class="section-shell">
+          <div class="section-intro">
+            <div>
+              <p class="eyebrow">Estoque</p>
+              <h2>Produtos cadastrados e saldo atual</h2>
+              <p>Cadastre novos produtos e acompanhe as quantidades disponiveis no seu estoque.</p>
+            </div>
+            <button type="button" class="ghost" (click)="refreshAll()">Atualizar</button>
+          </div>
+
+          <section class="workspace stock-layout">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Cadastrar produto</h3>
+                  <p>Crie itens que depois podem entrar nas notas fiscais.</p>
+                </div>
+              </div>
+
+              <form class="stack-form" [formGroup]="productForm" (ngSubmit)="submitProduct()">
+                <label>
+                  <span>Codigo</span>
+                  <input type="text" formControlName="code" placeholder="P001" />
+                </label>
+                <label>
+                  <span>Descricao</span>
+                  <input type="text" formControlName="description" placeholder="Caneta azul" />
+                </label>
+                <label>
+                  <span>Saldo</span>
+                  <input type="number" formControlName="stock" min="0" />
+                </label>
+                <button type="submit" [disabled]="savingProduct()">
+                  {{ savingProduct() ? 'Salvando...' : 'Salvar produto' }}
+                </button>
+              </form>
+            </div>
+
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Todos os produtos</h3>
+                  <p>Visualize codigo, descricao e quantidade de cada item do estoque.</p>
+                </div>
+              </div>
+
+              @if (loadingProducts()) {
+                <p class="empty">Carregando produtos...</p>
+              } @else if (!products().length) {
+                <p class="empty">Nenhum produto cadastrado ainda.</p>
+              } @else {
+                <div class="table-list">
                   @for (product of products(); track trackByProductCode($index, product)) {
-                    <option [value]="product.code">
-                      {{ product.code }} - {{ product.description }}
-                    </option>
+                    <article>
+                      <div>
+                        <strong>{{ product.code }}</strong>
+                        <span>{{ product.description }}</span>
+                      </div>
+                      <b>{{ product.stock }} un.</b>
+                    </article>
                   }
-                </select>
-              </label>
-              <label>
-                <span>Quantidade</span>
-                <input type="number" formControlName="quantity" min="1" />
-              </label>
-              @if (invoiceItems.length > 1) {
-                <button type="button" class="ghost danger" (click)="removeInvoiceItem($index)">Remover</button>
+                </div>
               }
             </div>
-          }
-        </div>
-
-        <button
-          type="button"
-          class="add-item-button"
-          (click)="addInvoiceItem()"
-          [disabled]="!hasProducts()"
-          aria-label="Adicionar produto na nota">
-          +
-        </button>
-
-        <button type="submit" [disabled]="savingInvoice() || !hasProducts()">
-          {{ savingInvoice() ? 'Salvando...' : 'Salvar nota' }}
-        </button>
-      </form>
-    </div>
-  </section>
-
-  <section class="lists">
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Produtos</h2>
-          <p>Visao atual do seu estoque.</p>
-        </div>
-        <button type="button" class="ghost" (click)="refreshAll()">Atualizar</button>
-      </div>
-
-      @if (loadingProducts()) {
-        <p class="empty">Carregando produtos...</p>
-      } @else if (!products().length) {
-        <p class="empty">Nenhum produto cadastrado ainda.</p>
+          </section>
+        </section>
       } @else {
-        <div class="table-list">
-          @for (product of products(); track trackByProductCode($index, product)) {
-            <article>
-              <div>
-                <strong>{{ product.code }}</strong>
-                <span>{{ product.description }}</span>
-              </div>
-              <b>{{ product.stock }} un.</b>
-            </article>
-          }
-        </div>
-      }
-    </div>
+        <section class="section-shell">
+          <div class="section-intro">
+            <div>
+              <p class="eyebrow">Notas</p>
+              <h2>Emissao e consulta de notas fiscais</h2>
+              <p>Crie notas, filtre por status e abra qualquer registro para ver os produtos e quantidades.</p>
+            </div>
+          </div>
 
-    <div class="panel">
-      <div class="panel-header">
-        <div>
-          <h2>Notas</h2>
-          <p>Historico de notas vinculadas ao usuario autenticado.</p>
-        </div>
-      </div>
-
-      @if (loadingInvoices()) {
-        <p class="empty">Carregando notas...</p>
-      } @else if (!invoices().length) {
-        <p class="empty">Nenhuma nota cadastrada ainda.</p>
-      } @else {
-        <div class="table-list">
-          @for (invoice of invoices(); track trackByInvoiceNumber($index, invoice)) {
-            <article class="invoice-card">
-              <div>
-                <strong>NF {{ invoice.number }}</strong>
-                <span>{{ invoice.status }}</span>
+          <section class="workspace invoice-layout">
+            <div class="panel">
+              <div class="panel-header">
+                <div>
+                  <h3>Criar nota</h3>
+                  <p>Monte uma nota fiscal aberta com numeracao e itens.</p>
+                </div>
               </div>
-              <small>{{ invoice.items.length }} item(ns)</small>
-            </article>
-          }
-        </div>
+
+              <form class="stack-form" [formGroup]="invoiceForm" (ngSubmit)="submitInvoice()">
+                <label>
+                  <span>Numeracao</span>
+                  <input type="number" formControlName="number" min="1" />
+                </label>
+
+                @if (!hasProducts()) {
+                  <p class="empty note-empty">Cadastre um produto no estoque para habilitar a criacao de notas.</p>
+                }
+
+                <div class="items" formArrayName="items">
+                  @for (item of invoiceItems.controls; track $index) {
+                    <div class="item-row" [formGroupName]="$index">
+                      <label>
+                        <span>Produto</span>
+                        <select formControlName="product_code">
+                          <option value="">Selecione um produto</option>
+                          @for (product of products(); track trackByProductCode($index, product)) {
+                            <option [value]="product.code">
+                              {{ product.code }} - {{ product.description }}
+                            </option>
+                          }
+                        </select>
+                      </label>
+                      <label>
+                        <span>Quantidade</span>
+                        <input type="number" formControlName="quantity" min="1" />
+                      </label>
+                      @if (invoiceItems.length > 1) {
+                        <button type="button" class="ghost danger" (click)="removeInvoiceItem($index)">Remover</button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <button
+                  type="button"
+                  class="add-item-button"
+                  (click)="addInvoiceItem()"
+                  [disabled]="!hasProducts()"
+                  aria-label="Adicionar produto na nota">
+                  +
+                </button>
+
+                <button type="submit" [disabled]="savingInvoice() || !hasProducts()">
+                  {{ savingInvoice() ? 'Salvando...' : 'Salvar nota' }}
+                </button>
+              </form>
+            </div>
+
+            <div class="panel notes-panel">
+              <div class="panel-header notes-header">
+                <div>
+                  <h3>Notas fiscais</h3>
+                  <p>Clique em uma nota para ver os itens e aplique filtros por status.</p>
+                </div>
+                <div class="filter-group" aria-label="Filtrar notas por status">
+                  <button type="button" class="ghost" [class.active-filter]="invoiceStatusFilter() === 'ALL'" (click)="setInvoiceFilter('ALL')">
+                    Todas
+                  </button>
+                  <button type="button" class="ghost" [class.active-filter]="invoiceStatusFilter() === 'OPEN'" (click)="setInvoiceFilter('OPEN')">
+                    Abertas
+                  </button>
+                  <button type="button" class="ghost" [class.active-filter]="invoiceStatusFilter() === 'CLOSED'" (click)="setInvoiceFilter('CLOSED')">
+                    Fechadas
+                  </button>
+                </div>
+              </div>
+
+              <div class="notes-grid">
+                <div class="notes-list">
+                  @if (loadingInvoices()) {
+                    <p class="empty">Carregando notas...</p>
+                  } @else if (!filteredInvoices().length) {
+                    <p class="empty">Nenhuma nota encontrada para o filtro selecionado.</p>
+                  } @else {
+                    <div class="table-list">
+                      @for (invoice of filteredInvoices(); track trackByInvoiceNumber($index, invoice)) {
+                        <button
+                          type="button"
+                          class="invoice-list-item"
+                          [class.selected]="selectedInvoice()?.number === invoice.number"
+                          (click)="selectInvoice(invoice.number)">
+                          <div>
+                            <strong>NF {{ invoice.number }}</strong>
+                            <span>{{ invoice.status }}</span>
+                          </div>
+                          <small>{{ invoice.items.length }} item(ns)</small>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="invoice-detail">
+                  @if (selectedInvoice(); as invoice) {
+                    <div class="detail-header">
+                      <div>
+                        <p class="eyebrow">Detalhes da nota</p>
+                        <h3>NF {{ invoice.number }}</h3>
+                      </div>
+                      <span class="status-pill" [class.closed]="invoice.status === 'CLOSED'">
+                        {{ invoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}
+                      </span>
+                    </div>
+
+                    <div class="detail-meta">
+                      <span>{{ invoice.items.length }} produto(s)</span>
+                      <span>{{ invoice.created_at || 'Data indisponivel' }}</span>
+                    </div>
+
+                    <div class="detail-items">
+                      @for (item of invoice.items; track $index) {
+                        <article>
+                          <div>
+                            <strong>{{ productLabel(item.product_code) }}</strong>
+                            <span>{{ item.product_code }}</span>
+                          </div>
+                          <b>{{ item.quantity }} un.</b>
+                        </article>
+                      }
+                    </div>
+                  } @else {
+                    <p class="empty">Selecione uma nota para visualizar os produtos e quantidades cadastrados.</p>
+                  }
+                </div>
+              </div>
+            </div>
+          </section>
+        </section>
       }
-    </div>
-  </section>
+    </main>
+  </div>
 </section>

@@ -5,7 +5,6 @@
 
 .home-shell {
   min-height: 100vh;
-  padding: 1.5rem;
   background:
     radial-gradient(circle at top left, rgba(219, 185, 72, 0.22), transparent 24%),
     radial-gradient(circle at 85% 30%, rgba(15, 117, 98, 0.18), transparent 26%),
@@ -15,16 +14,27 @@
 .site-header,
 .content,
 .site-footer {
-  width: min(1180px, 100%);
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
 }
 
 .site-header {
+  position: sticky;
+  top: 0;
+  width: 100%;
+
+
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
+
   gap: 1rem;
-  padding: 0.5rem 0 1.5rem;
+  padding: 0.85rem  1rem;
+
+  backdrop-filter: blur(16px);
+  background: rgba(249, 243, 231, 0.68);
+  border-bottom: 1px solid rgba(23, 50, 43, 0.08);
 }
 
 .brand {
@@ -73,6 +83,7 @@
 
 .eyebrow {
   margin: 0;
+  margin-left: 1.5rem;
   font-size: 0.85rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -80,16 +91,18 @@
   font-weight: 700;
 }
 
-h1 {
+.content .hero h1 {
   margin: 0;
+  margin-left: 1.5rem;
   max-width: 14ch;
-  font-size: clamp(3rem, 7vw, 6.2rem);
+  font-size: clamp(2.5rem, 5vw, 4.2rem);
   line-height: 0.92;
   color: #16211b;
 }
 
 .lead {
   margin: 0;
+  margin-left: 1.5rem;
   max-width: 42rem;
   font-size: 1.15rem;
   line-height: 1.7;
@@ -98,6 +111,8 @@ h1 {
 
 .offerings {
   display: grid;
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1.25rem;
   align-items: start;
@@ -114,6 +129,19 @@ h1 {
   box-shadow: 0 20px 45px rgba(23, 50, 43, 0.08);
   backdrop-filter: blur(10px);
   animation: floatIn 700ms ease both;
+
+  transition: 
+    transform 220ms ease,
+    box-shadow 220ms ease,
+    border-color 220ms ease;
+  cursor: pointer;
+  will-change: transform;
+}
+
+.floating-card:hover {
+  transform: translateY(-10px) scale(1.02) rotate(-0.5deg);
+  box-shadow: 0 28px 60px rgba(23, 50, 43, 0.30);
+  border-color: rgba(23, 50, 43, 0.18);
 }
 
 .floating-card:nth-child(2) {
@@ -150,22 +178,10 @@ h1 {
   color: #4b5b56;
 }
 
-.highlight {
-  background: linear-gradient(180deg, rgba(23, 50, 43, 0.95), rgba(15, 95, 82, 0.92));
-  color: #fffaf0;
-}
-
-.highlight h2,
-.highlight p,
-.highlight span {
-  color: inherit;
-}
-
-.highlight span {
-  background: rgba(255, 250, 240, 0.14);
-}
 
 .site-footer {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
   padding-bottom: 2rem;
 }
 
