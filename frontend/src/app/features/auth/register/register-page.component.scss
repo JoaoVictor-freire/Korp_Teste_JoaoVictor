@@ -1,0 +1,120 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.auth-view {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(224, 158, 51, 0.2), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(16, 111, 94, 0.18), transparent 30%),
+    linear-gradient(180deg, #f8f4ea 0%, #eef4ee 100%);
+}
+
+.auth-card {
+  width: min(100%, 31rem);
+  padding: 2rem;
+  border: 1px solid rgba(20, 35, 30, 0.08);
+  border-radius: 2rem;
+  background: rgba(255, 252, 247, 0.94);
+  box-shadow: 0 32px 80px rgba(20, 35, 30, 0.12);
+}
+
+.brand-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #17362e;
+}
+
+.heading {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #0f6a58;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.2rem, 4vw, 3rem);
+  line-height: 0.95;
+  color: #15241f;
+}
+
+.heading p:last-child {
+  margin: 0;
+  color: #4c5f59;
+  line-height: 1.7;
+}
+
+.error-banner {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: #ffe2db;
+  color: #8a311b;
+  font-weight: 600;
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.auth-form span {
+  font-weight: 700;
+  color: #24463d;
+}
+
+.auth-form input {
+  border: 1px solid rgba(36, 70, 61, 0.14);
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  font-size: 1rem;
+  background: #fffdfa;
+}
+
+.auth-form button {
+  margin-top: 0.5rem;
+  border: 0;
+  border-radius: 1rem;
+  padding: 1rem 1.2rem;
+  background: linear-gradient(135deg, #0f6a58, #17362e);
+  color: #fffdf9;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-form button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.helper-text {
+  margin: 1.25rem 0 0;
+  color: #4c5f59;
+}
+
+.helper-text a {
+  color: #0f6a58;
+  font-weight: 700;
+  text-decoration: none;
+}

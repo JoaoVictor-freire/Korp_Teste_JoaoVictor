@@ -1,0 +1,33 @@
+<section class="auth-view">
+  <div class="auth-card">
+    <a routerLink="/" class="brand-link">EmiteJa</a>
+    <div class="heading">
+      <p class="eyebrow">Acesse sua operacao</p>
+      <h1>Entre na sua conta</h1>
+      <p>Gerencie produtos e notas fiscais do seu negocio em um painel so seu.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error-banner">{{ errorMessage() }}</p>
+    }
+
+    <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submit()">
+      <label>
+        <span>Email</span>
+        <input type="email" formControlName="email" placeholder="voce@empresa.com" />
+      </label>
+      <label>
+        <span>Senha</span>
+        <input type="password" formControlName="password" placeholder="Digite sua senha" />
+      </label>
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Entrando...' : 'Entrar' }}
+      </button>
+    </form>
+
+    <p class="helper-text">
+      Ainda nao tem conta?
+      <a routerLink="/register">Crie seu cadastro</a>
+    </p>
+  </div>
+</section>

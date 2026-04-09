@@ -1,0 +1,249 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.home-shell {
+  min-height: 100vh;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top left, rgba(219, 185, 72, 0.22), transparent 24%),
+    radial-gradient(circle at 85% 30%, rgba(15, 117, 98, 0.18), transparent 26%),
+    linear-gradient(180deg, #f9f3e7 0%, #edf3ee 46%, #e8efe7 100%);
+}
+
+.site-header,
+.content,
+.site-footer {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0 1.5rem;
+}
+
+.brand {
+  text-decoration: none;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #17322b;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ghost-link,
+.solid-link {
+  text-decoration: none;
+  padding: 0.85rem 1.2rem;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+.ghost-link {
+  color: #17322b;
+  border: 1px solid rgba(23, 50, 43, 0.15);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.solid-link {
+  color: #fffaf0;
+  background: #17322b;
+}
+
+.content {
+  display: grid;
+  gap: 3rem;
+  padding: 3rem 0 4rem;
+}
+
+.hero {
+  display: grid;
+  gap: 1.25rem;
+  max-width: 52rem;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #0f5f52;
+  font-weight: 700;
+}
+
+h1 {
+  margin: 0;
+  max-width: 14ch;
+  font-size: clamp(3rem, 7vw, 6.2rem);
+  line-height: 0.92;
+  color: #16211b;
+}
+
+.lead {
+  margin: 0;
+  max-width: 42rem;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #41534d;
+}
+
+.offerings {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.floating-card {
+  min-height: 240px;
+  display: grid;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 1.75rem;
+  background: rgba(255, 253, 248, 0.82);
+  border: 1px solid rgba(23, 50, 43, 0.08);
+  box-shadow: 0 20px 45px rgba(23, 50, 43, 0.08);
+  backdrop-filter: blur(10px);
+  animation: floatIn 700ms ease both;
+}
+
+.floating-card:nth-child(2) {
+  transform: translateY(24px);
+}
+
+.floating-card:nth-child(3) {
+  transform: translateY(-12px);
+}
+
+.floating-card:nth-child(4) {
+  transform: translateY(18px);
+}
+
+.floating-card span {
+  width: fit-content;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(15, 95, 82, 0.1);
+  color: #0f5f52;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.floating-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #17322b;
+}
+
+.floating-card p {
+  margin: 0;
+  line-height: 1.7;
+  color: #4b5b56;
+}
+
+.highlight {
+  background: linear-gradient(180deg, rgba(23, 50, 43, 0.95), rgba(15, 95, 82, 0.92));
+  color: #fffaf0;
+}
+
+.highlight h2,
+.highlight p,
+.highlight span {
+  color: inherit;
+}
+
+.highlight span {
+  background: rgba(255, 250, 240, 0.14);
+}
+
+.site-footer {
+  padding-bottom: 2rem;
+}
+
+.footer-line {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(23, 50, 43, 0.26), transparent);
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+  padding: 1.75rem 0 0;
+}
+
+.footer-content strong {
+  display: block;
+  margin-bottom: 0.65rem;
+  color: #17322b;
+}
+
+.footer-content p {
+  margin: 0.2rem 0;
+  color: #556862;
+  line-height: 1.6;
+}
+
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .offerings,
+  .footer-content {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .floating-card:nth-child(n) {
+    transform: none;
+  }
+
+  .content {
+    padding-top: 2rem;
+  }
+}
+
+@media (max-width: 720px) {
+  .home-shell {
+    padding: 1rem;
+  }
+
+  .site-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-actions,
+  .offerings,
+  .footer-content {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .header-actions {
+    display: grid;
+  }
+
+  .ghost-link,
+  .solid-link {
+    text-align: center;
+  }
+}

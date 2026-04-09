@@ -1,0 +1,37 @@
+<section class="auth-view">
+  <div class="auth-card">
+    <a routerLink="/" class="brand-link">EmiteJa</a>
+    <div class="heading">
+      <p class="eyebrow">Comece agora</p>
+      <h1>Crie sua conta</h1>
+      <p>Monte o espaco do seu negocio, cadastre produtos e comece a emitir notas em poucos minutos.</p>
+    </div>
+
+    @if (errorMessage()) {
+      <p class="error-banner">{{ errorMessage() }}</p>
+    }
+
+    <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submit()">
+      <label>
+        <span>Nome</span>
+        <input type="text" formControlName="name" placeholder="Nome do responsavel" />
+      </label>
+      <label>
+        <span>Email</span>
+        <input type="email" formControlName="email" placeholder="voce@empresa.com" />
+      </label>
+      <label>
+        <span>Senha</span>
+        <input type="password" formControlName="password" placeholder="Minimo de 6 caracteres" />
+      </label>
+      <button type="submit" [disabled]="loading()">
+        {{ loading() ? 'Criando...' : 'Criar conta' }}
+      </button>
+    </form>
+
+    <p class="helper-text">
+      Ja possui acesso?
+      <a routerLink="/login">Entrar</a>
+    </p>
+  </div>
+</section>

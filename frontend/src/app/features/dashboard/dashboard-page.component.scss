@@ -1,0 +1,284 @@
+:host {
+  display: block;
+}
+
+.dashboard-shell {
+  min-height: 100vh;
+  padding: 2rem;
+  background:
+    linear-gradient(180deg, rgba(14, 84, 71, 0.08), transparent 22%),
+    radial-gradient(circle at 0% 0%, rgba(255, 188, 92, 0.22), transparent 24%),
+    #f4f1ea;
+  color: #1c241f;
+}
+
+.topbar,
+.workspace,
+.lists,
+.metrics {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #0e5f52;
+  font-weight: 700;
+}
+
+h1,
+h2 {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2rem, 3vw, 3.5rem);
+}
+
+.subtitle {
+  margin: 0.6rem 0 0;
+  color: #5f6b66;
+}
+
+.topbar-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.topbar-actions a,
+.topbar-actions button,
+.ghost,
+.stack-form button {
+  border: 0;
+  border-radius: 999px;
+  padding: 0.9rem 1.1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.topbar-actions a,
+.ghost {
+  background: rgba(255, 255, 255, 0.84);
+  color: #20433b;
+}
+
+.topbar-actions button,
+.stack-form button {
+  background: #17322b;
+  color: #fffdf8;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.metrics article,
+.panel {
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(24, 37, 31, 0.08);
+  box-shadow: 0 18px 50px rgba(18, 32, 27, 0.08);
+}
+
+.metrics article {
+  padding: 1.35rem;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.metrics span {
+  color: #68766f;
+}
+
+.metrics strong {
+  font-size: 2rem;
+  color: #163129;
+}
+
+.workspace,
+.lists {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel {
+  padding: 1.25rem;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel-header p {
+  margin: 0.35rem 0 0;
+  color: #697872;
+}
+
+.stack-form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.stack-form label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stack-form span {
+  font-weight: 700;
+  color: #28453d;
+}
+
+.stack-form input,
+.stack-form select {
+  border: 1px solid rgba(31, 61, 53, 0.14);
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  background: #fffdfa;
+  font-size: 1rem;
+}
+
+.stack-form select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1.5fr 0.9fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.add-item-button {
+  width: 3rem;
+  height: 3rem;
+  justify-self: center;
+  border: 1px dashed rgba(23, 50, 43, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #17322b;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-item-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.danger {
+  color: #912d22;
+}
+
+.note-empty {
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: #fff5d9;
+  color: #7c5a11;
+}
+
+.table-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.table-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.05rem;
+  border-radius: 1rem;
+  background: #fbfaf6;
+}
+
+.table-list article div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.table-list span,
+.table-list small {
+  color: #69756f;
+}
+
+.invoice-card {
+  align-items: flex-start;
+}
+
+.message {
+  max-width: 1280px;
+  margin: 0 auto 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  font-weight: 700;
+}
+
+.message.error {
+  background: #ffe3da;
+  color: #8e3218;
+}
+
+.message.success {
+  background: #dff4e6;
+  color: #19613b;
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem 0.25rem;
+  color: #6b7972;
+}
+
+@media (max-width: 1080px) {
+  .workspace,
+  .lists,
+  .metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 720px) {
+  .dashboard-shell {
+    padding: 1rem;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr;
+  }
+}

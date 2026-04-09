@@ -1,6 +1,10 @@
 package httpx
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+)
 
 type Server struct {
 	engine  *gin.Engine
@@ -9,7 +13,10 @@ type Server struct {
 
 func NewServer(address string) *Server {
 	engine := gin.New()
-	engine.Use(gin.Logger(), gin.Recovery())
+	engine.Use(gin.Logger(), gin.Recovery(), CORSMiddleware())
+	engine.OPTIONS("/*path", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
 
 	return &Server{
 		engine:  engine,
