@@ -6,6 +6,8 @@ import { DashboardPageComponent } from './features/dashboard/dashboard-page.comp
 import { HomepagePageComponent } from './features/homepage/homepage-page.component';
 import { LoginPageComponent } from './features/auth/login/login-page.component';
 import { RegisterPageComponent } from './features/auth/register/register-page.component';
+import { StockPageComponent } from './features/dashboard/stock/stock-page.component';
+import { InvoicesPageComponent } from './features/dashboard/invoices/invoices-page.component';
 
 export const routes: Routes = [
   {
@@ -26,6 +28,21 @@ export const routes: Routes = [
     path: 'dashboard',
     component: DashboardPageComponent,
     canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'stock',
+      },
+      {
+        path: 'stock',
+        component: StockPageComponent,
+      },
+      {
+        path: 'invoices',
+        component: InvoicesPageComponent,
+      },
+    ],
   },
   {
     path: '**',

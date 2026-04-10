@@ -1,0 +1,66 @@
+<section class="section-shell">
+  <div class="section-intro">
+    <div>
+      <p class="eyebrow">Estoque</p>
+      <h2>Produtos cadastrados e saldo atual</h2>
+      <p>Cadastre novos produtos e acompanhe as quantidades disponiveis no seu estoque.</p>
+    </div>
+    <button type="button" class="ghost" (click)="store.refresh()">Atualizar</button>
+  </div>
+
+  <section class="workspace stock-layout">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h3>Cadastrar produto</h3>
+          <p>Crie itens que depois podem entrar nas notas fiscais.</p>
+        </div>
+      </div>
+
+      <form class="stack-form" [formGroup]="productForm" (ngSubmit)="submitProduct()">
+        <label>
+          <span>Codigo</span>
+          <input type="text" formControlName="code" placeholder="P001" />
+        </label>
+        <label>
+          <span>Descricao</span>
+          <input type="text" formControlName="description" placeholder="Caneta azul" />
+        </label>
+        <label>
+          <span>Saldo</span>
+          <input type="number" formControlName="stock" min="0" />
+        </label>
+        <button type="submit" [disabled]="savingProduct()">
+          {{ savingProduct() ? 'Salvando...' : 'Salvar produto' }}
+        </button>
+      </form>
+    </div>
+
+    <div class="panel panel-scroll">
+      <div class="panel-header">
+        <div>
+          <h3>Todos os produtos</h3>
+          <p>Visualize codigo, descricao e quantidade de cada item do estoque.</p>
+        </div>
+      </div>
+
+      @if (loadingProducts()) {
+        <p class="empty">Carregando produtos...</p>
+      } @else if (!products().length) {
+        <p class="empty">Nenhum produto cadastrado ainda.</p>
+      } @else {
+        <div class="table-list">
+          @for (product of products(); track trackByProductCode($index, product)) {
+            <article>
+              <div>
+                <strong>{{ product.code }}</strong>
+                <span>{{ product.description }}</span>
+              </div>
+              <b>{{ product.stock }} un.</b>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  </section>
+</section>

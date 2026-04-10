@@ -1,238 +1,49 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
-import { ProductService } from '../../core/services/product.service';
-import { InvoiceService } from '../../core/services/invoice.service';
-import { Product } from '../../core/models/product.models';
-import { Invoice } from '../../core/models/invoice.models';
+import { DashboardUiStore } from './dashboard-ui.store';
+import { InvoicesStore } from './invoices/invoices.store';
+import { StockStore } from './stock/stock.store';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
+  providers: [DashboardUiStore, StockStore, InvoicesStore],
 })
 export class DashboardPageComponent {
-  private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
-  private readonly productService = inject(ProductService);
-  private readonly invoiceService = inject(InvoiceService);
   private readonly router = inject(Router);
 
   readonly user = this.authService.user;
-  readonly products = signal<Product[]>([]);
-  readonly invoices = signal<Invoice[]>([]);
-  readonly activeSection = signal<'stock' | 'invoices'>('stock');
+  readonly ui = inject(DashboardUiStore);
+  readonly stockStore = inject(StockStore);
+  readonly invoicesStore = inject(InvoicesStore);
+
   readonly sidebarOpen = signal(false);
-  readonly invoiceStatusFilter = signal<'ALL' | 'OPEN' | 'CLOSED'>('ALL');
-  readonly selectedInvoiceNumber = signal<number | null>(null);
-  readonly pageError = signal('');
-  readonly pageNotice = signal('');
-  readonly loadingProducts = signal(false);
-  readonly loadingInvoices = signal(false);
-  readonly savingProduct = signal(false);
-  readonly savingInvoice = signal(false);
-
-  readonly productCount = computed(() => this.products().length);
-  readonly invoiceCount = computed(() => this.invoices().length);
-  readonly openInvoiceCount = computed(() => this.invoices().filter((invoice) => invoice.status === 'OPEN').length);
-  readonly hasProducts = computed(() => this.products().length > 0);
-  readonly filteredInvoices = computed(() => {
-    const filter = this.invoiceStatusFilter();
-    if (filter === 'ALL') {
-      return this.invoices();
-    }
-
-    return this.invoices().filter((invoice) => invoice.status === filter);
-  });
-  readonly selectedInvoice = computed(() => {
-    const selectedNumber = this.selectedInvoiceNumber();
-    if (selectedNumber === null) {
-      return this.filteredInvoices()[0] ?? null;
-    }
-
-    return this.filteredInvoices().find((invoice) => invoice.number === selectedNumber) ?? this.filteredInvoices()[0] ?? null;
-  });
-
-  readonly productForm = this.fb.nonNullable.group({
-    code: ['', [Validators.required]],
-    description: ['', [Validators.required]],
-    stock: [0, [Validators.required, Validators.min(0)]],
-  });
-
-  readonly invoiceForm = this.fb.nonNullable.group({
-    number: [1, [Validators.required, Validators.min(1)]],
-    items: this.fb.array([this.createInvoiceItemGroup()]),
-  });
 
   constructor() {
     void this.refreshAll();
   }
 
-  get invoiceItems(): FormArray {
-    return this.invoiceForm.controls.items;
-  }
-
-  toggleSidebar(): void {
-    this.sidebarOpen.update((open) => !open);
+  async refreshAll(): Promise<void> {
+    this.ui.clearError();
+    await Promise.all([this.stockStore.refresh(), this.invoicesStore.refresh()]);
   }
 
   closeSidebar(): void {
     this.sidebarOpen.set(false);
   }
 
-  navigateTo(section: 'stock' | 'invoices'): void {
-    this.activeSection.set(section);
-    this.closeSidebar();
-  }
-
-  setInvoiceFilter(filter: 'ALL' | 'OPEN' | 'CLOSED'): void {
-    this.invoiceStatusFilter.set(filter);
-    this.syncSelectedInvoice();
-  }
-
-  selectInvoice(invoiceNumber: number): void {
-    this.selectedInvoiceNumber.set(invoiceNumber);
-  }
-
-  addInvoiceItem(): void {
-    this.invoiceItems.push(this.createInvoiceItemGroup());
-  }
-
-  removeInvoiceItem(index: number): void {
-    if (this.invoiceItems.length === 1) {
-      return;
-    }
-
-    this.invoiceItems.removeAt(index);
-  }
-
-  async refreshAll(): Promise<void> {
-    this.pageError.set('');
-    await Promise.all([this.loadProducts(), this.loadInvoices()]);
-  }
-
-  async submitProduct(): Promise<void> {
-    if (this.productForm.invalid) {
-      this.productForm.markAllAsTouched();
-      return;
-    }
-
-    try {
-      this.savingProduct.set(true);
-      this.pageNotice.set('');
-      await firstValueFrom(this.productService.create(this.productForm.getRawValue()));
-      this.productForm.reset({ code: '', description: '', stock: 0 });
-      this.pageNotice.set('Produto cadastrado com sucesso.');
-      await this.loadProducts();
-    } catch (error: any) {
-      this.pageError.set(error?.error?.error?.message ?? 'Falha ao cadastrar produto.');
-    } finally {
-      this.savingProduct.set(false);
-    }
-  }
-
-  async submitInvoice(): Promise<void> {
-    if (!this.hasProducts()) {
-      this.pageError.set('Cadastre pelo menos um produto antes de criar uma nota.');
-      return;
-    }
-
-    if (this.invoiceForm.invalid) {
-      this.invoiceForm.markAllAsTouched();
-      return;
-    }
-
-    try {
-      this.savingInvoice.set(true);
-      this.pageNotice.set('');
-      await firstValueFrom(this.invoiceService.create(this.invoiceForm.getRawValue()));
-      this.invoiceForm.reset({
-        number: this.invoiceCount() + 1,
-        items: [{ product_code: '', quantity: 1 }],
-      });
-      while (this.invoiceItems.length > 1) {
-        this.invoiceItems.removeAt(this.invoiceItems.length - 1);
-      }
-      this.pageNotice.set('Nota fiscal criada com sucesso.');
-      await this.loadInvoices();
-      this.activeSection.set('invoices');
-    } catch (error: any) {
-      this.pageError.set(error?.error?.error?.message ?? 'Falha ao criar nota.');
-    } finally {
-      this.savingInvoice.set(false);
-    }
+  toggleSidebar(): void {
+    this.sidebarOpen.update((open) => !open);
   }
 
   logout(): void {
     this.authService.logout();
     void this.router.navigate(['/']);
-  }
-
-  trackByProductCode(_: number, product: Product): string {
-    return product.code;
-  }
-
-  trackByInvoiceNumber(_: number, invoice: Invoice): number {
-    return invoice.number;
-  }
-
-  productLabel(code: string): string {
-    const product = this.products().find((item) => item.code === code);
-    if (!product) {
-      return code;
-    }
-
-    return `${product.code} - ${product.description}`;
-  }
-
-  private async loadProducts(): Promise<void> {
-    try {
-      this.loadingProducts.set(true);
-      const response = await firstValueFrom(this.productService.list());
-      this.products.set(response.data);
-    } catch (error: any) {
-      this.pageError.set(error?.error?.error?.message ?? 'Falha ao carregar produtos.');
-    } finally {
-      this.loadingProducts.set(false);
-    }
-  }
-
-  private async loadInvoices(): Promise<void> {
-    try {
-      this.loadingInvoices.set(true);
-      const response = await firstValueFrom(this.invoiceService.list());
-      this.invoices.set(response.data);
-      this.syncSelectedInvoice();
-    } catch (error: any) {
-      this.pageError.set(error?.error?.error?.message ?? 'Falha ao carregar notas.');
-    } finally {
-      this.loadingInvoices.set(false);
-    }
-  }
-
-  private createInvoiceItemGroup() {
-    return this.fb.nonNullable.group({
-      product_code: ['', [Validators.required]],
-      quantity: [1, [Validators.required, Validators.min(1)]],
-    });
-  }
-
-  private syncSelectedInvoice(): void {
-    const selectedNumber = this.selectedInvoiceNumber();
-    const availableInvoices = this.filteredInvoices();
-
-    if (!availableInvoices.length) {
-      this.selectedInvoiceNumber.set(null);
-      return;
-    }
-
-    if (selectedNumber === null || !availableInvoices.some((invoice) => invoice.number === selectedNumber)) {
-      this.selectedInvoiceNumber.set(availableInvoices[0].number);
-    }
   }
 }

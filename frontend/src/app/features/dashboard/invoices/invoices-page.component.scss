@@ -1,0 +1,270 @@
+.section-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.section-intro p:last-child {
+  margin: 0.45rem 0 0;
+  color: #5f6b66;
+}
+
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #0e5f52;
+  font-weight: 700;
+}
+
+h2,
+h3 {
+  margin: 0;
+}
+
+.workspace {
+  display: grid;
+  gap: 1rem;
+}
+
+.invoice-layout {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel {
+  padding: 1.25rem;
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(24, 37, 31, 0.08);
+  box-shadow: 0 18px 50px rgba(18, 32, 27, 0.08);
+  overflow-x: hidden;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.panel-header p {
+  margin: 0.35rem 0 0;
+  color: #697872;
+}
+
+.stack-form {
+  display: grid;
+  gap: 0.95rem;
+}
+
+.stack-form label {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.stack-form span {
+  font-weight: 700;
+  color: #28453d;
+}
+
+.stack-form input,
+.stack-form select {
+  border: 1px solid rgba(31, 61, 53, 0.14);
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  background: #fffdfa;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.stack-form select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.item-row > * {
+  min-width: 0;
+}
+
+.item-row button {
+  white-space: nowrap;
+}
+
+.add-item-button {
+  width: 3rem;
+  height: 3rem;
+  justify-self: center;
+  border: 1px dashed rgba(23, 50, 43, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #17322b;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.add-item-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.ghost,
+.stack-form button,
+.invoice-list-item {
+  border: 0;
+  border-radius: 1rem;
+  padding: 0.9rem 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ghost {
+  background: rgba(255, 255, 255, 0.84);
+  color: #20433b;
+}
+
+.stack-form button {
+  background: #17322b;
+  color: #fffdf8;
+}
+
+.danger {
+  color: #912d22;
+}
+
+.note-empty {
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: #fff5d9;
+  color: #7c5a11;
+}
+
+.table-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.invoice-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  text-align: left;
+  background: #fbfaf6;
+  padding: 1rem 1.05rem;
+}
+
+.invoice-list-item.selected {
+  background: rgba(23, 50, 43, 0.92);
+  color: #fffdf8;
+}
+
+.invoice-list-item.selected span,
+.invoice-list-item.selected small {
+  color: rgba(255, 253, 248, 0.78);
+}
+
+.table-list span,
+.table-list small {
+  color: #69756f;
+}
+
+.notes-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+}
+
+.invoice-detail {
+  border-radius: 1.2rem;
+  background: #fbfaf6;
+  padding: 1.1rem;
+  min-height: 100%;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.status-pill {
+  padding: 0.55rem 0.85rem;
+  border-radius: 999px;
+  background: #e0f2e6;
+  color: #1d6b40;
+  font-weight: 700;
+}
+
+.status-pill.closed {
+  background: #f3e4dc;
+  color: #8e3218;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  color: #69756f;
+  margin-bottom: 1rem;
+}
+
+.detail-items {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.detail-items article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.95rem 1rem;
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.detail-items article div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.empty {
+  margin: 0;
+  padding: 1rem 0.25rem;
+  color: #6b7972;
+}
+
+@media (max-width: 1080px) {
+  .invoice-layout,
+  .notes-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .item-row {
+    grid-template-columns: 1fr;
+  }
+
+  .item-row button {
+    width: 100%;
+  }
+}
