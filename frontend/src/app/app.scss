@@ -34,12 +34,19 @@
 }
 
 .toast button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   color: inherit;
-  font-size: 1.1rem;
-  line-height: 1;
   cursor: pointer;
+}
+
+.toast button .mat-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  font-size: 1.1rem;
 }
 
 .toast-success {

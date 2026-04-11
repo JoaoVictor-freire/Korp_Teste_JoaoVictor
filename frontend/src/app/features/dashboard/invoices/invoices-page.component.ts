@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { Invoice } from '../../../core/models/invoice.models';
@@ -9,7 +10,7 @@ import { InvoicesStore } from './invoices.store';
 
 @Component({
   selector: 'app-invoices-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './invoices-page.component.html',
   styleUrl: './invoices-page.component.scss',
 })

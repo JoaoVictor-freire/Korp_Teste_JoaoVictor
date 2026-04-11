@@ -57,7 +57,7 @@
           (click)="addInvoiceItem()"
           [disabled]="!hasProducts() || !canAddInvoiceItem()"
           aria-label="Adicionar produto na nota">
-          +
+          <mat-icon>add</mat-icon>
         </button>
 
         <button type="submit" [disabled]="savingInvoice() || !hasProducts()">

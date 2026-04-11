@@ -36,9 +36,7 @@
                   [disabled]="invoice.status === 'CLOSED'"
                   (click)="$event.stopPropagation(); openEditModal(invoice)"
                   aria-label="Editar nota fiscal">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z" />
-                  </svg>
+                  <mat-icon>edit</mat-icon>
                 </button>
                 <button
                   type="button"
@@ -46,9 +44,7 @@
                   [disabled]="invoice.status === 'CLOSED'"
                   (click)="$event.stopPropagation(); openDeleteModal(invoice)"
                   aria-label="Excluir nota fiscal">
-                  <svg viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2H8l1-2zM4 7h16v2H4V7z" />
-                  </svg>
+                  <mat-icon>delete</mat-icon>
                 </button>
               </div>
             </div>
@@ -65,7 +61,9 @@
 
       @if (totalPages() > 1) {
         <nav class="pagination" aria-label="Paginacao do historico de notas">
-          <button type="button" class="page-nav" [disabled]="currentPage() === 1" (click)="goToPreviousPage()">&lt;</button>
+          <button type="button" class="page-nav" [disabled]="currentPage() === 1" (click)="goToPreviousPage()">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
           @for (item of paginationItems(); track $index) {
             @if (isPageNumber(item)) {
               <button type="button" class="page-number" [class.active]="currentPage() === item" (click)="goToPage(item)">
@@ -75,7 +73,9 @@
               <span class="page-ellipsis">...</span>
             }
           }
-          <button type="button" class="page-nav" [disabled]="currentPage() === totalPages()" (click)="goToNextPage()">&gt;</button>
+          <button type="button" class="page-nav" [disabled]="currentPage() === totalPages()" (click)="goToNextPage()">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
         </nav>
       }
     }
@@ -89,7 +89,9 @@
           <p class="eyebrow">Detalhes da nota</p>
           <h3 id="invoice-modal-title">NF {{ invoice.number }}</h3>
         </div>
-        <button type="button" class="close-button" (click)="closeModal()" aria-label="Fechar modal">×</button>
+        <button type="button" class="close-button" (click)="closeModal()" aria-label="Fechar modal">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <div class="detail-meta">
@@ -121,7 +123,9 @@
           <p class="eyebrow">Editar nota</p>
           <h3 id="edit-invoice-title">NF {{ invoice.number }}</h3>
         </div>
-        <button type="button" class="close-button" (click)="closeEditModal()" aria-label="Fechar modal">×</button>
+        <button type="button" class="close-button" (click)="closeEditModal()" aria-label="Fechar modal">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <form class="modal-form" [formGroup]="editForm" (ngSubmit)="submitEdit()">
@@ -157,7 +161,9 @@
           </div>
         </div>
 
-        <button type="button" class="add-item-button" [disabled]="!canAddInvoiceItem()" (click)="addInvoiceItem()">+</button>
+        <button type="button" class="add-item-button" [disabled]="!canAddInvoiceItem()" (click)="addInvoiceItem()">
+          <mat-icon>add</mat-icon>
+        </button>
 
         <div class="modal-actions">
           <button type="button" class="ghost" (click)="closeEditModal()">Cancelar</button>
@@ -177,7 +183,9 @@
           <p class="eyebrow">Excluir nota</p>
           <h3 id="delete-invoice-title">NF {{ invoice.number }}</h3>
         </div>
-        <button type="button" class="close-button" (click)="closeDeleteModal()" aria-label="Fechar modal">×</button>
+        <button type="button" class="close-button" (click)="closeDeleteModal()" aria-label="Fechar modal">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <p class="confirm-copy">Deseja realmente excluir esta nota fiscal? Essa acao remove a nota aberta definitivamente.</p>

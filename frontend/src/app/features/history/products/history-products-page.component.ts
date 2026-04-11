@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CreateProductRequest, Product } from '../../../core/models/product.models';
@@ -10,7 +11,7 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-history-products-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './history-products-page.component.html',
   styleUrl: './history-products-page.component.scss',
 })

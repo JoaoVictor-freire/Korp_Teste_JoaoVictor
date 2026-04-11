@@ -143,10 +143,10 @@ h3 {
   cursor: pointer;
 }
 
-.icon-button svg {
+.icon-button .mat-icon {
   width: 1.15rem;
   height: 1.15rem;
-  fill: currentColor;
+  font-size: 1.15rem;
 }
 
 .icon-button.danger {
@@ -188,13 +188,21 @@ h3 {
 }
 
 .close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 0;
   background: transparent;
   padding: 0;
-  font-size: 1.8rem;
-  line-height: 1;
   color: #17322b;
   cursor: pointer;
+}
+
+.close-button .mat-icon,
+.page-nav .mat-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 1.35rem;
 }
 
 .modal-form {

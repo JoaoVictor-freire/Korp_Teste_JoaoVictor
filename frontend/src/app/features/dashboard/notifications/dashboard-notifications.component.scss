@@ -16,10 +16,10 @@
   cursor: pointer;
 }
 
-.bell-button svg {
+.bell-button .mat-icon {
   width: 1.35rem;
   height: 1.35rem;
-  fill: currentColor;
+  font-size: 1.35rem;
 }
 
 .badge {

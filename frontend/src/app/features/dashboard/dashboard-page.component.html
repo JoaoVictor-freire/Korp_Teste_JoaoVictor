@@ -2,9 +2,7 @@
   <header class="topbar">
     <div class="topbar-left">
       <button type="button" class="menu-button" (click)="toggleSidebar()" aria-label="Abrir menu lateral">
-        <span></span>
-        <span></span>
-        <span></span>
+        <mat-icon>menu</mat-icon>
       </button>
 
       <div>
@@ -28,25 +26,23 @@
     <aside class="sidebar" [class.open]="sidebarOpen()">
       <div class="sidebar-header">
         <strong>Navegacao</strong>
-        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="Fechar menu">×</button>
+        <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="Fechar menu">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
 
       <nav class="sidebar-nav" aria-label="Ferramentas">
         <a routerLink="/dashboard/stock" routerLinkActive="active" (click)="closeSidebar()">
-          <span>Estoque</span>
-          <small>{{ stockStore.productCount() }} produtos</small>
-        </a>
-        <a routerLink="/dashboard/invoices" routerLinkActive="active" (click)="closeSidebar()">
-          <span>Notas</span>
-          <small>{{ invoicesStore.invoiceCount() }} notas</small>
+          <span>Produtos</span>
         </a>
         <a routerLink="/dashboard/history-products" routerLinkActive="active" (click)="closeSidebar()">
-          <span>Historico produtos</span>
-          <small>Busca e ordenacao</small>
+          <span>Estoque produtos</span>
+        </a>        
+        <a routerLink="/dashboard/invoices" routerLinkActive="active" (click)="closeSidebar()">
+          <span>Notas</span>
         </a>
         <a routerLink="/dashboard/history-invoices" routerLinkActive="active" (click)="closeSidebar()">
-          <span>Historico notas</span>
-          <small>Filtros e fechamento</small>
+          <span>Emissão notas</span>
         </a>
       </nav>
     </aside>

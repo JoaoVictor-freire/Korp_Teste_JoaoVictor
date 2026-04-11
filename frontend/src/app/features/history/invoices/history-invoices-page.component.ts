@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 
 import { CreateInvoiceRequest, Invoice } from '../../../core/models/invoice.models';
@@ -11,7 +12,7 @@ const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-history-invoices-page',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule],
   templateUrl: './history-invoices-page.component.html',
   styleUrl: './history-invoices-page.component.scss',
 })

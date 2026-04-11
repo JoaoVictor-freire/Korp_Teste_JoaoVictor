@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, HostListener, inject, signal } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 
 import { DashboardNotificationsStore } from './dashboard-notifications.store';
 
 @Component({
   selector: 'app-dashboard-notifications',
-  imports: [CommonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './dashboard-notifications.component.html',
   styleUrl: './dashboard-notifications.component.scss',
 })

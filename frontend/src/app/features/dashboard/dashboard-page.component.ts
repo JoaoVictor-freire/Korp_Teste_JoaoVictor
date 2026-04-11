@@ -1,6 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { MatIconModule } from '@angular/material/icon';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map, startWith } from 'rxjs';
 
@@ -13,7 +14,7 @@ import { StockStore } from './stock/stock.store';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, DashboardNotificationsComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MatIconModule, DashboardNotificationsComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
   providers: [DashboardUiStore, DashboardNotificationsStore, StockStore, InvoicesStore],

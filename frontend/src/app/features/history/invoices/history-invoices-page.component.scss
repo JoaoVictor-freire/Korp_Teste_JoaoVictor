@@ -120,10 +120,10 @@ h3 {
   cursor: pointer;
 }
 
-.icon-button svg {
+.icon-button .mat-icon {
   width: 1.15rem;
   height: 1.15rem;
-  fill: currentColor;
+  font-size: 1.15rem;
 }
 
 .icon-button:disabled {
@@ -191,11 +191,20 @@ h3 {
 }
 
 .close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: transparent;
   padding: 0;
-  font-size: 1.8rem;
-  line-height: 1;
   color: #17322b;
+}
+
+.close-button .mat-icon,
+.page-nav .mat-icon,
+.add-item-button .mat-icon {
+  width: 1.35rem;
+  height: 1.35rem;
+  font-size: 1.35rem;
 }
 
 .detail-meta {
