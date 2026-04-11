@@ -21,13 +21,45 @@
     } @else {
       <div class="card-grid">
         @for (invoice of paginatedInvoices(); track trackByInvoiceNumber($index, invoice)) {
-          <button type="button" class="invoice-card" (click)="openInvoice(invoice.number)">
-            <div>
+          <article class="invoice-card" (click)="openInvoice(invoice.number)">
+            <div class="invoice-card-main">
               <strong>NF {{ invoice.number }}</strong>
               <span>{{ invoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}</span>
+              <small>{{ formatInvoiceDate(invoice.created_at) }}</small>
             </div>
-            <small>{{ invoice.items.length }} item(ns)</small>
-          </button>
+            <div class="invoice-card-footer">
+              <small>{{ invoice.items.length }} item(ns)</small>
+              <div class="icon-actions">
+                <button
+                  type="button"
+                  class="icon-button"
+                  [disabled]="invoice.status === 'CLOSED'"
+                  (click)="$event.stopPropagation(); openEditModal(invoice)"
+                  aria-label="Editar nota fiscal">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="icon-button danger"
+                  [disabled]="invoice.status === 'CLOSED'"
+                  (click)="$event.stopPropagation(); openDeleteModal(invoice)"
+                  aria-label="Excluir nota fiscal">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2H8l1-2zM4 7h16v2H4V7z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="emit-card-button"
+              [disabled]="invoice.status === 'CLOSED' || invoicesStore.closingInvoice()"
+              (click)="$event.stopPropagation(); emitInvoice(invoice)">
+              {{ invoicesStore.closingInvoice() && emittingInvoiceNumber() === invoice.number ? 'Emitindo...' : invoice.status === 'CLOSED' ? 'Nota emitida' : 'Emitir' }}
+            </button>
+          </article>
         }
       </div>
 
@@ -78,10 +110,82 @@
           </article>
         }
       </div>
+    </section>
+  }
+
+  @if (editingInvoice(); as invoice) {
+    <div class="modal-backdrop" (click)="closeEditModal()"></div>
+    <section class="modal-card edit-modal" role="dialog" aria-modal="true" aria-labelledby="edit-invoice-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Editar nota</p>
+          <h3 id="edit-invoice-title">NF {{ invoice.number }}</h3>
+        </div>
+        <button type="button" class="close-button" (click)="closeEditModal()" aria-label="Fechar modal">×</button>
+      </div>
+
+      <form class="modal-form" [formGroup]="editForm" (ngSubmit)="submitEdit()">
+        <label>
+          <span>Numeracao</span>
+          <input type="number" min="1" formControlName="number" />
+        </label>
+
+        <div class="items-scroll">
+          <div class="items" formArrayName="items">
+            @for (item of invoiceItems.controls; track $index; let rowIndex = $index) {
+              <div class="item-row" [formGroupName]="rowIndex">
+                <label>
+                  <span>Produto</span>
+                  <select formControlName="product_code" (change)="handleProductSelection(rowIndex)">
+                    <option value="">Selecione um produto</option>
+                    @for (product of products(); track product.code) {
+                      <option [value]="product.code" [disabled]="isProductSelectedInAnotherRow(product.code, rowIndex)">
+                        {{ product.code }} - {{ product.description }}
+                      </option>
+                    }
+                  </select>
+                </label>
+                <label>
+                  <span>Quantidade</span>
+                  <input type="number" min="1" formControlName="quantity" />
+                </label>
+                @if (invoiceItems.length > 1) {
+                  <button type="button" class="ghost danger-text" (click)="removeInvoiceItem(rowIndex)">Remover</button>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <button type="button" class="add-item-button" [disabled]="!canAddInvoiceItem()" (click)="addInvoiceItem()">+</button>
+
+        <div class="modal-actions">
+          <button type="button" class="ghost" (click)="closeEditModal()">Cancelar</button>
+          <button type="submit" class="solid" [disabled]="invoicesStore.updatingInvoice()">
+            {{ invoicesStore.updatingInvoice() ? 'Salvando...' : 'Salvar nota' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (deletingInvoice(); as invoice) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+    <section class="modal-card compact" role="dialog" aria-modal="true" aria-labelledby="delete-invoice-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Excluir nota</p>
+          <h3 id="delete-invoice-title">NF {{ invoice.number }}</h3>
+        </div>
+        <button type="button" class="close-button" (click)="closeDeleteModal()" aria-label="Fechar modal">×</button>
+      </div>
+
+      <p class="confirm-copy">Deseja realmente excluir esta nota fiscal? Essa acao remove a nota aberta definitivamente.</p>
 
       <div class="modal-actions">
-        <button type="button" class="solid" [disabled]="invoice.status === 'CLOSED' || invoicesStore.closingInvoice()" (click)="closeInvoice()">
-          {{ invoicesStore.closingInvoice() ? 'Fechando...' : invoice.status === 'CLOSED' ? 'Nota fechada' : 'Fechar nota fiscal' }}
+        <button type="button" class="ghost" (click)="closeDeleteModal()">Cancelar</button>
+        <button type="button" class="danger-button" [disabled]="invoicesStore.deletingInvoice()" (click)="confirmDelete()">
+          {{ invoicesStore.deletingInvoice() ? 'Excluindo...' : 'Excluir' }}
         </button>
       </div>
     </section>

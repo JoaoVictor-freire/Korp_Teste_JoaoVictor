@@ -23,5 +23,8 @@ func RegisterRoutes(engine *gin.Engine, handler Handler, authMiddleware gin.Hand
 	invoices := v1.Group("/invoices")
 	invoices.POST("", handler.CreateInvoice)
 	invoices.GET("", handler.ListInvoices)
+	invoices.GET("/:number", handler.GetInvoice)
+	invoices.PUT("/:number", handler.UpdateInvoice)
+	invoices.DELETE("/:number", handler.DeleteInvoice)
 	invoices.PATCH("/:number/close", handler.CloseInvoice)
 }

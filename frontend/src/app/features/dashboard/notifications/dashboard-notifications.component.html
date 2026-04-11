@@ -1,0 +1,38 @@
+<div class="notifications-shell">
+  <button type="button" class="bell-button" (click)="toggle()" aria-label="Abrir notificacoes">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 22a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22zm6-6V11a6 6 0 1 0-12 0v5l-2 2v1h16v-1l-2-2z" />
+    </svg>
+    @if (count() > 0) {
+      <span class="badge">{{ count() }}</span>
+    }
+  </button>
+
+  @if (open()) {
+    <div class="notifications-panel">
+      <div class="panel-header">
+        <div>
+          <strong>Notificacoes</strong>
+          <small>{{ count() }} aviso(s)</small>
+        </div>
+        @if (count() > 0) {
+          <button type="button" class="clear-button" (click)="clearAll()">Limpar</button>
+        }
+      </div>
+
+      @if (!count()) {
+        <p class="empty">Nenhuma notificacao por enquanto.</p>
+      } @else {
+        <div class="notification-list">
+          @for (notification of store.notifications(); track notification.id) {
+            <article>
+              <strong>Estoque</strong>
+              <p>{{ notification.message }}</p>
+              <small>{{ formatTimestamp(notification.createdAt) }}</small>
+            </article>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>

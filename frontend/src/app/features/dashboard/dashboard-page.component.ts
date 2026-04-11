@@ -5,16 +5,18 @@ import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } fro
 import { filter, map, startWith } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
+import { DashboardNotificationsComponent } from './notifications/dashboard-notifications.component';
+import { DashboardNotificationsStore } from './notifications/dashboard-notifications.store';
 import { DashboardUiStore } from './dashboard-ui.store';
 import { InvoicesStore } from './invoices/invoices.store';
 import { StockStore } from './stock/stock.store';
 
 @Component({
   selector: 'app-dashboard-page',
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, DashboardNotificationsComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
-  providers: [DashboardUiStore, StockStore, InvoicesStore],
+  providers: [DashboardUiStore, DashboardNotificationsStore, StockStore, InvoicesStore],
 })
 export class DashboardPageComponent {
   private readonly authService = inject(AuthService);

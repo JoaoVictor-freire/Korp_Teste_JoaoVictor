@@ -31,26 +31,8 @@ func NewCreateInvoiceUseCase(repository domain.InvoiceRepository) CreateInvoiceU
 }
 
 func (uc CreateInvoiceUseCase) Execute(ctx context.Context, input CreateInvoiceInput) (domain.Invoice, error) {
-	if input.OwnerID == "" {
-		return domain.Invoice{}, errors.New("owner id is required")
-	}
-
-	if input.Number <= 0 {
-		return domain.Invoice{}, ErrInvoiceNumberInvalid
-	}
-
-	if len(input.Items) == 0 {
-		return domain.Invoice{}, ErrInvoiceItemsRequired
-	}
-
-	for _, item := range input.Items {
-		if item.ProductCode == "" {
-			return domain.Invoice{}, ErrInvoiceItemCodeRequired
-		}
-
-		if item.Quantity <= 0 {
-			return domain.Invoice{}, ErrInvoiceItemQuantityError
-		}
+	if err := validateInvoiceInput(input.OwnerID, input.Number, input.Items); err != nil {
+		return domain.Invoice{}, err
 	}
 
 	exists, err := uc.repository.ExistsByOwnerAndNumber(ctx, input.OwnerID, input.Number)

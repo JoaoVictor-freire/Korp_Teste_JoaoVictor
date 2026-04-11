@@ -17,6 +17,7 @@
         <span>Usuario</span>
         <strong>{{ user()?.name || 'usuario' }}</strong>
       </div>
+      <app-dashboard-notifications />
       <button type="button" (click)="logout()">Logout</button>
     </div>
   </header>

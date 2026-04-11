@@ -41,6 +41,9 @@ func New() App {
 	handler := billinghttp.NewHandler(
 		application.NewCreateInvoiceUseCase(invoiceRepository),
 		application.NewListInvoicesUseCase(invoiceRepository),
+		application.NewGetInvoiceUseCase(invoiceRepository),
+		application.NewUpdateInvoiceUseCase(invoiceRepository),
+		application.NewDeleteInvoiceUseCase(invoiceRepository),
 		application.NewCloseInvoiceUseCase(invoiceRepository, productRepository),
 	)
 

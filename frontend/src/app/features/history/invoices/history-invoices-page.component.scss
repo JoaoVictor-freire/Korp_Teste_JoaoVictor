@@ -73,23 +73,81 @@ h3 {
 .invoice-card {
   width: 100%;
   min-height: 9.5rem;
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
   gap: 1rem;
   text-align: left;
   background: #fbfaf6;
   box-shadow: inset 0 0 0 1px rgba(31, 61, 53, 0.08);
+  padding: 1rem 1.1rem;
+  cursor: pointer;
 }
 
-.invoice-card div {
+.invoice-card-main {
   display: grid;
   gap: 0.2rem;
 }
 
-.invoice-card span,
+.invoice-card-main span,
+.invoice-card-main small,
 .invoice-card small {
   color: #69756f;
+}
+
+.invoice-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.icon-actions {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.65rem;
+  height: 2.65rem;
+  border: 0;
+  border-radius: 0.9rem;
+  background: #ffffff;
+  color: #20433b;
+  box-shadow: inset 0 0 0 1px rgba(31, 61, 53, 0.1);
+  cursor: pointer;
+}
+
+.icon-button svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  fill: currentColor;
+}
+
+.icon-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.icon-button.danger {
+  color: #8f2e20;
+}
+
+.emit-card-button {
+  border: 0;
+  border-radius: 1rem;
+  padding: 0.9rem 1rem;
+  background: #17322b;
+  color: #fffdf8;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.emit-card-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .modal-backdrop {
@@ -114,6 +172,15 @@ h3 {
   background: rgba(255, 252, 247, 0.98);
   box-shadow: 0 24px 80px rgba(18, 32, 27, 0.22);
   z-index: 80;
+  overflow: hidden;
+}
+
+.modal-card.compact {
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.edit-modal {
+  width: min(44rem, calc(100vw - 2rem));
 }
 
 .modal-header {
@@ -174,6 +241,108 @@ h3 {
   gap: 0.2rem;
 }
 
+.modal-form {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  gap: 1rem;
+  min-height: 0;
+}
+
+.modal-form label {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.modal-form span {
+  font-weight: 700;
+  color: #28453d;
+}
+
+.modal-form input,
+.modal-form select {
+  border: 1px solid rgba(31, 61, 53, 0.14);
+  border-radius: 1rem;
+  padding: 0.95rem 1rem;
+  background: #fffdfa;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.modal-form select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding-right: 3rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, #476057 50%),
+    linear-gradient(135deg, #476057 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) calc(50% - 0.12rem),
+    calc(100% - 0.8rem) calc(50% - 0.12rem);
+  background-size: 0.45rem 0.45rem, 0.45rem 0.45rem;
+  background-repeat: no-repeat;
+}
+
+.items {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.items-scroll {
+  max-height: min(42vh, 24rem);
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.item-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 0.9fr) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.item-row > * {
+  min-width: 0;
+}
+
+.danger-text {
+  background: rgba(255, 255, 255, 0.84);
+  color: #8f2e20;
+}
+
+.add-item-button {
+  width: 3rem;
+  height: 3rem;
+  border: 0;
+  border-radius: 999px;
+  background: #17322b;
+  color: #fffdf8;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.add-item-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.confirm-copy {
+  margin: 0;
+  color: #4d5b56;
+  line-height: 1.5;
+}
+
+.danger-button {
+  border: 0;
+  border-radius: 1rem;
+  padding: 0.9rem 1.15rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: #8f2e20;
+  color: #fff8f5;
+}
+
 .modal-actions {
   display: flex;
   justify-content: flex-end;
@@ -228,12 +397,22 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .invoice-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .item-row {
+    grid-template-columns: 1fr;
+  }
+
   .modal-actions {
     flex-direction: column;
   }
 
   .ghost,
-  .solid {
+  .solid,
+  .danger-button {
     width: 100%;
   }
 }

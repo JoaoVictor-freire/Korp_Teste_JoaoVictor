@@ -7,5 +7,7 @@ type InvoiceRepository interface {
 	ListByOwner(ctx context.Context, ownerID string) ([]Invoice, error)
 	ExistsByOwnerAndNumber(ctx context.Context, ownerID string, number int) (bool, error)
 	GetByOwnerAndNumber(ctx context.Context, ownerID string, number int) (Invoice, error)
+	Update(ctx context.Context, originalNumber int, invoice Invoice) error
 	UpdateStatus(ctx context.Context, number int, ownerID string, newStatus bool) error
+	Delete(ctx context.Context, ownerID string, number int) error
 }

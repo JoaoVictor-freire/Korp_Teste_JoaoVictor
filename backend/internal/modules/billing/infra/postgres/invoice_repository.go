@@ -125,6 +125,47 @@ func (r *InvoiceRepository) GetByOwnerAndNumber(ctx context.Context, ownerID str
 	return invoice, nil
 }
 
+func (r *InvoiceRepository) Update(ctx context.Context, originalNumber int, invoice domain.Invoice) error {
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var model InvoiceModel
+		if err := tx.
+			Preload("Items").
+			Where("idusuario = ? AND numeracao = ?", invoice.OwnerID, originalNumber).
+			First(&model).Error; err != nil {
+			return err
+		}
+
+		model.Numeration = invoice.Number
+		model.Status = invoice.Status == domain.StatusOpen
+
+		if err := tx.Model(&model).Updates(map[string]any{
+			"numeracao": model.Numeration,
+			"status":    model.Status,
+		}).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Where("idnota = ?", model.ID).Delete(&InvoiceItemModel{}).Error; err != nil {
+			return err
+		}
+
+		items := make([]InvoiceItemModel, 0, len(invoice.Items))
+		for _, item := range invoice.Items {
+			items = append(items, InvoiceItemModel{
+				InvoiceID:   model.ID,
+				ProductCode: item.ProductCode,
+				Quantity:    item.Quantity,
+			})
+		}
+
+		if len(items) == 0 {
+			return nil
+		}
+
+		return tx.Create(&items).Error
+	})
+}
+
 func (r *InvoiceRepository) UpdateStatus(ctx context.Context, number int, ownerID string, newStatus bool) error {
 	err := r.db.WithContext(ctx).
 		Model(&InvoiceModel{}).
@@ -136,4 +177,10 @@ func (r *InvoiceRepository) UpdateStatus(ctx context.Context, number int, ownerI
 	}
 
 	return nil
+}
+
+func (r *InvoiceRepository) Delete(ctx context.Context, ownerID string, number int) error {
+	return r.db.WithContext(ctx).
+		Where("idusuario = ? AND numeracao = ?", ownerID, number).
+		Delete(&InvoiceModel{}).Error
 }

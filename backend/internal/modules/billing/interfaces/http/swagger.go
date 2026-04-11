@@ -180,6 +180,130 @@ const billingSwaggerDoc = `{
         }
       }
     },
+    "/api/v1/invoices/{number}": {
+      "get": {
+        "summary": "Get invoice by number",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice details",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/InvoiceEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update invoice",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateInvoiceRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invoice updated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/InvoiceEnvelope"}
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "409": {
+            "description": "Closed invoice or duplicate number",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete invoice",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice deleted",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/MessageEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "409": {
+            "description": "Closed invoice cannot be deleted",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/invoices/{number}/close": {
       "patch": {
         "summary": "Close invoice",
