@@ -11,12 +11,12 @@
     <div class="history-toolbar">
       <label class="search-field">
         <span>Pesquisar produto</span>
-        <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" placeholder="Digite nome ou codigo" />
+        <input type="text" [value]="searchTerm()" (input)="updateSearchTerm($any($event.target).value)" placeholder="Digite nome ou codigo" />
       </label>
 
       <label class="sort-field">
         <span>Ordenar por</span>
-        <select [value]="sortBy()" (change)="sortBy.set($any($event.target).value)">
+        <select [value]="sortBy()" (change)="updateSortBy($any($event.target).value)">
           <option value="name">Nome</option>
           <option value="stock">Quantidade</option>
         </select>
@@ -28,9 +28,9 @@
     } @else if (!filteredProducts().length) {
       <p class="empty">Nenhum produto encontrado para a busca atual.</p>
     } @else {
-      <div class="table-list">
-        @for (product of filteredProducts(); track trackByProductCode($index, product)) {
-          <article>
+      <div class="card-grid">
+        @for (product of paginatedProducts(); track trackByProductCode($index, product)) {
+          <article class="product-card">
             <div class="product-info">
               <strong>{{ product.description }}</strong>
               <span>{{ product.code }}</span>
@@ -53,6 +53,22 @@
           </article>
         }
       </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Paginacao do historico de produtos">
+          <button type="button" class="page-nav" [disabled]="currentPage() === 1" (click)="goToPreviousPage()">&lt;</button>
+          @for (item of paginationItems(); track $index) {
+            @if (isPageNumber(item)) {
+              <button type="button" class="page-number" [class.active]="currentPage() === item" (click)="goToPage(item)">
+                {{ item }}
+              </button>
+            } @else {
+              <span class="page-ellipsis">...</span>
+            }
+          }
+          <button type="button" class="page-nav" [disabled]="currentPage() === totalPages()" (click)="goToNextPage()">&gt;</button>
+        </nav>
+      }
     }
   </section>
 

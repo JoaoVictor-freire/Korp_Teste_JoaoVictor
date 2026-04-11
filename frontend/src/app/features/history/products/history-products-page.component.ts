@@ -6,6 +6,7 @@ import { CreateProductRequest, Product } from '../../../core/models/product.mode
 import { StockStore } from '../../dashboard/stock/stock.store';
 
 type ProductSort = 'name' | 'stock';
+const PAGE_SIZE = 20;
 
 @Component({
   selector: 'app-history-products-page',
@@ -19,6 +20,7 @@ export class HistoryProductsPageComponent {
 
   readonly searchTerm = signal('');
   readonly sortBy = signal<ProductSort>('name');
+  readonly currentPage = signal(1);
   readonly editingProductCode = signal<string | null>(null);
   readonly deletingProductCode = signal<string | null>(null);
   readonly editForm = this.fb.nonNullable.group({
@@ -47,6 +49,66 @@ export class HistoryProductsPageComponent {
       return left.description.localeCompare(right.description);
     });
   });
+
+  readonly totalPages = computed(() => {
+    const total = Math.ceil(this.filteredProducts().length / PAGE_SIZE);
+    return Math.max(1, total);
+  });
+
+  readonly paginatedProducts = computed(() => {
+    const safePage = Math.min(this.currentPage(), this.totalPages());
+    const start = (safePage - 1) * PAGE_SIZE;
+    return this.filteredProducts().slice(start, start + PAGE_SIZE);
+  });
+
+  readonly paginationItems = computed(() => {
+    const totalPages = this.totalPages();
+    const currentPage = Math.min(this.currentPage(), totalPages);
+
+    if (totalPages <= 5) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1);
+    }
+
+    if (currentPage <= 3) {
+      return [1, 2, 3, '...', totalPages];
+    }
+
+    if (currentPage >= totalPages - 2) {
+      return [1, '...', totalPages - 2, totalPages - 1, totalPages];
+    }
+
+    return [1, '...', currentPage, '...', totalPages];
+  });
+
+  updateSearchTerm(value: string): void {
+    this.searchTerm.set(value);
+    this.currentPage.set(1);
+  }
+
+  updateSortBy(value: ProductSort): void {
+    this.sortBy.set(value);
+    this.currentPage.set(1);
+  }
+
+  goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages()) {
+      return;
+    }
+
+    this.currentPage.set(page);
+  }
+
+  isPageNumber(item: number | string): item is number {
+    return typeof item === 'number';
+  }
+
+  goToPreviousPage(): void {
+    this.goToPage(this.currentPage() - 1);
+  }
+
+  goToNextPage(): void {
+    this.goToPage(this.currentPage() + 1);
+  }
 
   trackByProductCode(_: number, product: Product): string {
     return product.code;

@@ -19,8 +19,8 @@
     } @else if (!filteredInvoices().length) {
       <p class="empty">Nenhuma nota encontrada para o filtro selecionado.</p>
     } @else {
-      <div class="table-list">
-        @for (invoice of filteredInvoices(); track trackByInvoiceNumber($index, invoice)) {
+      <div class="card-grid">
+        @for (invoice of paginatedInvoices(); track trackByInvoiceNumber($index, invoice)) {
           <button type="button" class="invoice-card" (click)="openInvoice(invoice.number)">
             <div>
               <strong>NF {{ invoice.number }}</strong>
@@ -30,6 +30,22 @@
           </button>
         }
       </div>
+
+      @if (totalPages() > 1) {
+        <nav class="pagination" aria-label="Paginacao do historico de notas">
+          <button type="button" class="page-nav" [disabled]="currentPage() === 1" (click)="goToPreviousPage()">&lt;</button>
+          @for (item of paginationItems(); track $index) {
+            @if (isPageNumber(item)) {
+              <button type="button" class="page-number" [class.active]="currentPage() === item" (click)="goToPage(item)">
+                {{ item }}
+              </button>
+            } @else {
+              <span class="page-ellipsis">...</span>
+            }
+          }
+          <button type="button" class="page-nav" [disabled]="currentPage() === totalPages()" (click)="goToNextPage()">&gt;</button>
+        </nav>
+      }
     }
   </section>
 
