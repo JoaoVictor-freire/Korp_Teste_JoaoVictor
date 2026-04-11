@@ -37,6 +37,10 @@ export class InvoicesPageComponent {
   }
 
   addInvoiceItem(): void {
+    if (!this.canAddInvoiceItem()) {
+      return;
+    }
+
     this.invoiceItems.push(this.createInvoiceItemGroup());
   }
 
@@ -55,6 +59,11 @@ export class InvoicesPageComponent {
 
     if (this.invoiceForm.invalid) {
       this.invoiceForm.markAllAsTouched();
+      return;
+    }
+
+    if (this.hasDuplicateProducts()) {
+      this.ui.setError('Nao e permitido adicionar o mesmo produto duas vezes na mesma nota.');
       return;
     }
 
@@ -82,6 +91,38 @@ export class InvoicesPageComponent {
     return invoice.number;
   }
 
+  isProductSelectedInAnotherRow(productCode: string, currentIndex: number): boolean {
+    if (!productCode) {
+      return false;
+    }
+
+    return this.invoiceItems.controls.some((control, index) => {
+      if (index === currentIndex) {
+        return false;
+      }
+
+      return control.get('product_code')?.value === productCode;
+    });
+  }
+
+  handleProductSelection(rowIndex: number): void {
+    const selectedCode = this.invoiceItems.at(rowIndex)?.get('product_code')?.value;
+    if (!selectedCode) {
+      return;
+    }
+
+    if (!this.isProductSelectedInAnotherRow(selectedCode, rowIndex)) {
+      return;
+    }
+
+    this.invoiceItems.at(rowIndex)?.get('product_code')?.setValue('');
+    this.ui.setError('Nao e permitido adicionar o mesmo produto duas vezes na mesma nota.');
+  }
+
+  canAddInvoiceItem(): boolean {
+    return this.invoiceItems.length < this.products().length;
+  }
+
   productLabel(code: string): string {
     const product = this.products().find((item) => item.code === code);
     if (!product) {
@@ -95,5 +136,13 @@ export class InvoicesPageComponent {
       product_code: ['', [Validators.required]],
       quantity: [1, [Validators.required, Validators.min(1)]],
     });
+  }
+
+  private hasDuplicateProducts(): boolean {
+    const selectedCodes = this.invoiceItems.controls
+      .map((control) => control.get('product_code')?.value)
+      .filter((value): value is string => !!value);
+
+    return new Set(selectedCodes).size !== selectedCodes.length;
   }
 }

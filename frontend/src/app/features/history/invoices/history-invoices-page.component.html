@@ -1,0 +1,73 @@
+<section class="section-shell">
+  <div class="section-intro">
+    <div>
+      <p class="eyebrow">Historico de notas</p>
+      <h2>Todas as notas cadastradas</h2>
+      <p>Filtre por status e abra qualquer nota para consultar detalhes ou fechá-la.</p>
+    </div>
+  </div>
+
+  <section class="panel history-panel">
+    <div class="filter-group" aria-label="Filtrar historico de notas">
+      <button type="button" class="ghost" [class.active-filter]="filter() === 'ALL'" (click)="setFilter('ALL')">Todas</button>
+      <button type="button" class="ghost" [class.active-filter]="filter() === 'OPEN'" (click)="setFilter('OPEN')">Abertas</button>
+      <button type="button" class="ghost" [class.active-filter]="filter() === 'CLOSED'" (click)="setFilter('CLOSED')">Fechadas</button>
+    </div>
+
+    @if (invoicesStore.loadingInvoices()) {
+      <p class="empty">Carregando notas...</p>
+    } @else if (!filteredInvoices().length) {
+      <p class="empty">Nenhuma nota encontrada para o filtro selecionado.</p>
+    } @else {
+      <div class="table-list">
+        @for (invoice of filteredInvoices(); track trackByInvoiceNumber($index, invoice)) {
+          <button type="button" class="invoice-card" (click)="openInvoice(invoice.number)">
+            <div>
+              <strong>NF {{ invoice.number }}</strong>
+              <span>{{ invoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}</span>
+            </div>
+            <small>{{ invoice.items.length }} item(ns)</small>
+          </button>
+        }
+      </div>
+    }
+  </section>
+
+  @if (modalOpen() && selectedInvoice(); as invoice) {
+    <div class="modal-backdrop" (click)="closeModal()"></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="invoice-modal-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Detalhes da nota</p>
+          <h3 id="invoice-modal-title">NF {{ invoice.number }}</h3>
+        </div>
+        <button type="button" class="close-button" (click)="closeModal()" aria-label="Fechar modal">×</button>
+      </div>
+
+      <div class="detail-meta">
+        <span class="status-pill" [class.closed]="invoice.status === 'CLOSED'">
+          {{ invoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}
+        </span>
+        <span>{{ invoice.created_at || 'Data indisponivel' }}</span>
+      </div>
+
+      <div class="detail-items">
+        @for (item of invoice.items; track $index) {
+          <article>
+            <div>
+              <strong>{{ productLabel(item.product_code) }}</strong>
+              <span>{{ item.product_code }}</span>
+            </div>
+            <b>{{ item.quantity }} un.</b>
+          </article>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="solid" [disabled]="invoice.status === 'CLOSED' || invoicesStore.closingInvoice()" (click)="closeInvoice()">
+          {{ invoicesStore.closingInvoice() ? 'Fechando...' : invoice.status === 'CLOSED' ? 'Nota fechada' : 'Fechar nota fiscal' }}
+        </button>
+      </div>
+    </section>
+  }
+</section>

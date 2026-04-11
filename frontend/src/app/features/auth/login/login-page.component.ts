@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-login-page',
@@ -15,8 +16,8 @@ export class LoginPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
-  readonly errorMessage = signal('');
   readonly loading = signal(false);
 
   readonly loginForm = this.fb.nonNullable.group({
@@ -31,16 +32,16 @@ export class LoginPageComponent {
     }
 
     this.loading.set(true);
-    this.errorMessage.set('');
 
     this.authService.login(this.loginForm.getRawValue()).subscribe({
       next: () => {
         this.loading.set(false);
+        this.toastService.showSuccess('Login realizado com sucesso.');
         void this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(error?.error?.error?.message ?? 'Falha ao entrar.');
+        this.toastService.showError(error?.error?.error?.message ?? 'Falha ao entrar.');
       },
     });
   }

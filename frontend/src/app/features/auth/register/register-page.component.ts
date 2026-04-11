@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 
 import { AuthService } from '../../../core/services/auth.service';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-register-page',
@@ -15,8 +16,8 @@ export class RegisterPageComponent {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toastService = inject(ToastService);
 
-  readonly errorMessage = signal('');
   readonly loading = signal(false);
 
   readonly registerForm = this.fb.nonNullable.group({
@@ -32,16 +33,16 @@ export class RegisterPageComponent {
     }
 
     this.loading.set(true);
-    this.errorMessage.set('');
 
     this.authService.register(this.registerForm.getRawValue()).subscribe({
       next: () => {
         this.loading.set(false);
+        this.toastService.showSuccess('Conta criada com sucesso.');
         void this.router.navigate(['/dashboard']);
       },
       error: (error) => {
         this.loading.set(false);
-        this.errorMessage.set(error?.error?.error?.message ?? 'Falha ao criar conta.');
+        this.toastService.showError(error?.error?.error?.message ?? 'Falha ao criar conta.');
       },
     });
   }

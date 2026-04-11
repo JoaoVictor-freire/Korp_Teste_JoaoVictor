@@ -1,6 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map, startWith } from 'rxjs';
 
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardUiStore } from './dashboard-ui.store';
@@ -24,6 +26,15 @@ export class DashboardPageComponent {
   readonly invoicesStore = inject(InvoicesStore);
 
   readonly sidebarOpen = signal(false);
+  private readonly currentUrl = toSignal(
+    this.router.events.pipe(
+      filter((event) => event instanceof NavigationEnd),
+      map(() => this.router.url),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+  readonly showMetrics = computed(() => !this.currentUrl().includes('/dashboard/history-'));
 
   constructor() {
     void this.refreshAll();

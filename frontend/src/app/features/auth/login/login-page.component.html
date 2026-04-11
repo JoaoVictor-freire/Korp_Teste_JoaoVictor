@@ -7,10 +7,6 @@
       <p>Gerencie produtos e notas fiscais do seu negocio em um painel so seu.</p>
     </div>
 
-    @if (errorMessage()) {
-      <p class="error-banner">{{ errorMessage() }}</p>
-    }
-
     <form class="auth-form" [formGroup]="loginForm" (ngSubmit)="submit()">
       <label>
         <span>Email</span>

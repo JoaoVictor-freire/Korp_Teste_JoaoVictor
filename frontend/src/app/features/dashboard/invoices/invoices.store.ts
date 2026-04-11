@@ -13,6 +13,7 @@ export class InvoicesStore {
   readonly invoices = signal<Invoice[]>([]);
   readonly loadingInvoices = signal(false);
   readonly savingInvoice = signal(false);
+  readonly closingInvoice = signal(false);
 
   // Creation screen: show only open invoices. History screen can override later.
   readonly invoiceStatusFilter = signal<'ALL' | 'OPEN' | 'CLOSED'>('OPEN');
@@ -57,6 +58,21 @@ export class InvoicesStore {
       this.ui.setError(error?.error?.error?.message ?? 'Falha ao criar nota.');
     } finally {
       this.savingInvoice.set(false);
+    }
+  }
+
+  async closeInvoice(number: number): Promise<void> {
+    try {
+      this.closingInvoice.set(true);
+      this.ui.clearError();
+
+      await firstValueFrom(this.invoiceService.close(number));
+      this.ui.showNotice('Nota fiscal fechada com sucesso.');
+      await this.loadInvoices();
+    } catch (error: any) {
+      this.ui.setError(error?.error?.error?.message ?? 'Falha ao fechar nota.');
+    } finally {
+      this.closingInvoice.set(false);
     }
   }
 

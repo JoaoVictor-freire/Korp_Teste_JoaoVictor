@@ -17,4 +17,8 @@ export class InvoiceService {
   create(payload: CreateInvoiceRequest): Observable<Envelope<Invoice>> {
     return this.http.post<Envelope<Invoice>>(`${apiConfig.billingBaseUrl}/api/v1/invoices`, payload);
   }
+
+  close(number: number): Observable<Envelope<{ message: string }>> {
+    return this.http.patch<Envelope<{ message: string }>>(`${apiConfig.billingBaseUrl}/api/v1/invoices/${number}/close`, {});
+  }
 }

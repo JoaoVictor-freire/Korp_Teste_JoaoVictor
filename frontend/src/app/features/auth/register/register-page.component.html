@@ -7,10 +7,6 @@
       <p>Monte o espaco do seu negocio, cadastre produtos e comece a emitir notas em poucos minutos.</p>
     </div>
 
-    @if (errorMessage()) {
-      <p class="error-banner">{{ errorMessage() }}</p>
-    }
-
     <form class="auth-form" [formGroup]="registerForm" (ngSubmit)="submit()">
       <label>
         <span>Nome</span>

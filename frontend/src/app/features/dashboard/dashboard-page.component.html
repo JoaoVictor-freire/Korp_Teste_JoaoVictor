@@ -39,32 +39,34 @@
           <span>Notas</span>
           <small>{{ invoicesStore.invoiceCount() }} notas</small>
         </a>
+        <a routerLink="/dashboard/history-products" routerLinkActive="active" (click)="closeSidebar()">
+          <span>Historico produtos</span>
+          <small>Busca e ordenacao</small>
+        </a>
+        <a routerLink="/dashboard/history-invoices" routerLinkActive="active" (click)="closeSidebar()">
+          <span>Historico notas</span>
+          <small>Filtros e fechamento</small>
+        </a>
       </nav>
     </aside>
 
     <main class="dashboard-content">
-      @if (ui.pageError()) {
-        <p class="message error">{{ ui.pageError() }}</p>
+      @if (showMetrics()) {
+        <section class="metrics">
+          <article>
+            <span>Produtos</span>
+            <strong>{{ stockStore.productCount() }}</strong>
+          </article>
+          <article>
+            <span>Notas</span>
+            <strong>{{ invoicesStore.invoiceCount() }}</strong>
+          </article>
+          <article>
+            <span>Notas abertas</span>
+            <strong>{{ invoicesStore.openInvoiceCount() }}</strong>
+          </article>
+        </section>
       }
-
-      @if (ui.pageNotice()) {
-        <p class="message success">{{ ui.pageNotice() }}</p>
-      }
-
-      <section class="metrics">
-        <article>
-          <span>Produtos</span>
-          <strong>{{ stockStore.productCount() }}</strong>
-        </article>
-        <article>
-          <span>Notas</span>
-          <strong>{{ invoicesStore.invoiceCount() }}</strong>
-        </article>
-        <article>
-          <span>Notas abertas</span>
-          <strong>{{ invoicesStore.openInvoiceCount() }}</strong>
-        </article>
-      </section>
       <router-outlet />
     </main>
   </div>

@@ -1,0 +1,44 @@
+<section class="section-shell">
+  <div class="section-intro">
+    <div>
+      <p class="eyebrow">Historico de produtos</p>
+      <h2>Todos os produtos cadastrados</h2>
+      <p>Pesquise e ordene o historico completo do seu estoque.</p>
+    </div>
+  </div>
+
+  <section class="panel history-panel">
+    <div class="history-toolbar">
+      <label class="search-field">
+        <span>Pesquisar produto</span>
+        <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Digite nome ou codigo" />
+      </label>
+
+      <label class="sort-field">
+        <span>Ordenar por</span>
+        <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+          <option value="name">Nome</option>
+          <option value="stock">Quantidade</option>
+        </select>
+      </label>
+    </div>
+
+    @if (store.loadingProducts()) {
+      <p class="empty">Carregando produtos...</p>
+    } @else if (!filteredProducts().length) {
+      <p class="empty">Nenhum produto encontrado para a busca atual.</p>
+    } @else {
+      <div class="table-list">
+        @for (product of filteredProducts(); track trackByProductCode($index, product)) {
+          <article>
+            <div>
+              <strong>{{ product.description }}</strong>
+              <span>{{ product.code }}</span>
+            </div>
+            <b>{{ product.stock }} un.</b>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</section>

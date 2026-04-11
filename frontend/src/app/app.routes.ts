@@ -8,6 +8,8 @@ import { LoginPageComponent } from './features/auth/login/login-page.component';
 import { RegisterPageComponent } from './features/auth/register/register-page.component';
 import { StockPageComponent } from './features/dashboard/stock/stock-page.component';
 import { InvoicesPageComponent } from './features/dashboard/invoices/invoices-page.component';
+import { HistoryProductsPageComponent } from './features/history/products/history-products-page.component';
+import { HistoryInvoicesPageComponent } from './features/history/invoices/history-invoices-page.component';
 
 export const routes: Routes = [
   {
@@ -41,6 +43,14 @@ export const routes: Routes = [
       {
         path: 'invoices',
         component: InvoicesPageComponent,
+      },
+      {
+        path: 'history-products',
+        component: HistoryProductsPageComponent,
+      },
+      {
+        path: 'history-invoices',
+        component: HistoryInvoicesPageComponent,
       },
     ],
   },

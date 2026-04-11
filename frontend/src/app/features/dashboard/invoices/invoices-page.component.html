@@ -8,7 +8,7 @@
   </div>
 
   <section class="workspace invoice-layout">
-    <div class="panel">
+    <div class="panel panel-scroll">
       <div class="panel-header">
         <div>
           <h3>Criar nota</h3>
@@ -27,14 +27,14 @@
         }
 
         <div class="items" formArrayName="items">
-          @for (item of invoiceItems.controls; track $index) {
-            <div class="item-row" [formGroupName]="$index">
+          @for (item of invoiceItems.controls; track $index; let rowIndex = $index) {
+            <div class="item-row" [formGroupName]="rowIndex">
               <label>
                 <span>Produto</span>
-                <select formControlName="product_code">
+                <select formControlName="product_code" (change)="handleProductSelection(rowIndex)">
                   <option value="">Selecione um produto</option>
                   @for (product of products(); track product.code) {
-                    <option [value]="product.code">
+                    <option [value]="product.code" [disabled]="isProductSelectedInAnotherRow(product.code, rowIndex)">
                       {{ product.code }} - {{ product.description }}
                     </option>
                   }
@@ -45,7 +45,7 @@
                 <input type="number" formControlName="quantity" min="1" />
               </label>
               @if (invoiceItems.length > 1) {
-                <button type="button" class="ghost danger" (click)="removeInvoiceItem($index)">Remover</button>
+                <button type="button" class="ghost danger" (click)="removeInvoiceItem(rowIndex)">Remover</button>
               }
             </div>
           }
@@ -55,7 +55,7 @@
           type="button"
           class="add-item-button"
           (click)="addInvoiceItem()"
-          [disabled]="!hasProducts()"
+          [disabled]="!hasProducts() || !canAddInvoiceItem()"
           aria-label="Adicionar produto na nota">
           +
         </button>
@@ -66,7 +66,7 @@
       </form>
     </div>
 
-    <div class="panel notes-panel">
+    <div class="panel notes-panel panel-scroll">
       <div class="panel-header notes-header">
         <div>
           <h3>Notas fiscais</h3>
