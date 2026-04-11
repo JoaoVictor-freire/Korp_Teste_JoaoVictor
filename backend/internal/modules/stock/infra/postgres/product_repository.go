@@ -83,9 +83,26 @@ func (r *ProductRepository) GetByOwnerAndCode(ctx context.Context, ownerID strin
 	}, nil
 }
 
+func (r *ProductRepository) Update(ctx context.Context, originalCode string, product domain.Product) error {
+	return r.db.WithContext(ctx).
+		Model(&ProductModel{}).
+		Where("idusuario = ? AND codigo = ?", product.OwnerID, originalCode).
+		Updates(map[string]any{
+			"codigo":    product.Code,
+			"descricao": product.Description,
+			"saldo":     product.Stock,
+		}).Error
+}
+
 func (r *ProductRepository) UpdateStock(ctx context.Context, ownerID string, code string, newStock int) error {
 	return r.db.WithContext(ctx).
 		Model(&ProductModel{}).
 		Where("idusuario = ? AND codigo = ?", ownerID, code).
 		Update("saldo", newStock).Error
+}
+
+func (r *ProductRepository) Delete(ctx context.Context, ownerID string, code string) error {
+	return r.db.WithContext(ctx).
+		Where("idusuario = ? AND codigo = ?", ownerID, code).
+		Delete(&ProductModel{}).Error
 }

@@ -11,12 +11,12 @@
     <div class="history-toolbar">
       <label class="search-field">
         <span>Pesquisar produto</span>
-        <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)" placeholder="Digite nome ou codigo" />
+        <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" placeholder="Digite nome ou codigo" />
       </label>
 
       <label class="sort-field">
         <span>Ordenar por</span>
-        <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($event)">
+        <select [value]="sortBy()" (change)="sortBy.set($any($event.target).value)">
           <option value="name">Nome</option>
           <option value="stock">Quantidade</option>
         </select>
@@ -31,14 +31,85 @@
       <div class="table-list">
         @for (product of filteredProducts(); track trackByProductCode($index, product)) {
           <article>
-            <div>
+            <div class="product-info">
               <strong>{{ product.description }}</strong>
               <span>{{ product.code }}</span>
             </div>
-            <b>{{ product.stock }} un.</b>
+            <div class="product-actions">
+              <div class="icon-actions">
+                <button type="button" class="icon-button" (click)="openEditModal(product)" aria-label="Editar produto">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm14.71-9.04a1.003 1.003 0 0 0 0-1.42l-2.5-2.5a1.003 1.003 0 0 0-1.42 0l-1.96 1.96 3.75 3.75 2.13-1.79z" />
+                  </svg>
+                </button>
+                <button type="button" class="icon-button danger" (click)="openDeleteModal(product)" aria-label="Excluir produto">
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M6 7h12l-1 14H7L6 7zm3-3h6l1 2H8l1-2zM4 7h16v2H4V7z" />
+                  </svg>
+                </button>
+              </div>
+              <b>{{ product.stock }} un.</b>
+            </div>
           </article>
         }
       </div>
     }
   </section>
+
+  @if (editingProduct(); as product) {
+    <div class="modal-backdrop" (click)="closeEditModal()"></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="edit-product-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Editar produto</p>
+          <h3 id="edit-product-title">{{ product.description }}</h3>
+        </div>
+        <button type="button" class="close-button" (click)="closeEditModal()" aria-label="Fechar modal">×</button>
+      </div>
+
+      <form class="modal-form" [formGroup]="editForm" (ngSubmit)="submitEdit()">
+        <label>
+          <span>Codigo</span>
+          <input type="text" formControlName="code" />
+        </label>
+        <label>
+          <span>Nome</span>
+          <input type="text" formControlName="description" />
+        </label>
+        <label>
+          <span>Quantidade</span>
+          <input type="number" min="0" formControlName="stock" />
+        </label>
+
+        <div class="modal-actions">
+          <button type="button" class="ghost-button" (click)="closeEditModal()">Cancelar</button>
+          <button type="submit" class="solid-button" [disabled]="store.updatingProduct()">
+            {{ store.updatingProduct() ? 'Salvando...' : 'Salvar' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  }
+
+  @if (deletingProduct(); as product) {
+    <div class="modal-backdrop" (click)="closeDeleteModal()"></div>
+    <section class="modal-card compact" role="dialog" aria-modal="true" aria-labelledby="delete-product-title">
+      <div class="modal-header">
+        <div>
+          <p class="eyebrow">Excluir produto</p>
+          <h3 id="delete-product-title">{{ product.description }}</h3>
+        </div>
+        <button type="button" class="close-button" (click)="closeDeleteModal()" aria-label="Fechar modal">×</button>
+      </div>
+
+      <p class="confirm-copy">Deseja mesmo excluir este produto do estoque? Esta acao nao pode ser desfeita.</p>
+
+      <div class="modal-actions">
+        <button type="button" class="ghost-button" (click)="closeDeleteModal()">Cancelar</button>
+        <button type="button" class="danger-button" [disabled]="store.deletingProduct()" (click)="confirmDelete()">
+          {{ store.deletingProduct() ? 'Excluindo...' : 'Excluir' }}
+        </button>
+      </div>
+    </section>
+  }
 </section>

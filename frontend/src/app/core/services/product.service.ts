@@ -17,4 +17,12 @@ export class ProductService {
   create(payload: CreateProductRequest): Observable<Envelope<Product>> {
     return this.http.post<Envelope<Product>>(`${apiConfig.stockBaseUrl}/api/v1/products`, payload);
   }
+
+  update(originalCode: string, payload: CreateProductRequest): Observable<Envelope<Product>> {
+    return this.http.put<Envelope<Product>>(`${apiConfig.stockBaseUrl}/api/v1/products/${originalCode}`, payload);
+  }
+
+  delete(code: string): Observable<Envelope<{ message: string }>> {
+    return this.http.delete<Envelope<{ message: string }>>(`${apiConfig.stockBaseUrl}/api/v1/products/${code}`);
+  }
 }

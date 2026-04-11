@@ -105,6 +105,17 @@ const stockSwaggerDoc = `{
             "items": {"$ref": "#/components/schemas/Product"}
           }
         }
+      },
+      "MessageEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {"type": "string", "example": "product deleted successfully"}
+            }
+          }
+        }
       }
     }
   },
@@ -267,6 +278,92 @@ const stockSwaggerDoc = `{
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/products/{code}": {
+      "put": {
+        "summary": "Update product",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/CreateProductRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Product updated",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ProductEnvelope"}
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "409": {
+            "description": "Product code already exists for this user",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete product",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "string"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Product deleted",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/MessageEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Product not found",
             "content": {
               "application/json": {
                 "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
