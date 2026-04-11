@@ -113,21 +113,32 @@ h3 {
   white-space: nowrap;
 }
 
-.add-item-button {
+.stack-form .add-item-button {
   width: 3rem;
   height: 3rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   justify-self: center;
+  align-self: center;
+  padding: 0;
   border: 1px dashed rgba(23, 50, 43, 0.25);
-  border-radius: 999px;
   background: rgba(255, 255, 255, 0.9);
   color: #17322b;
-  font-size: 1.6rem;
-  line-height: 1;
+  border-radius: 999px;
   font-weight: 500;
   cursor: pointer;
 }
 
-.add-item-button:disabled {
+.stack-form .add-item-button mat-icon {
+  margin: 0;
+  font-size: 1.4rem;
+  width: 1.4rem;
+  height: 1.4rem;
+  line-height: 1.4rem;
+}
+
+.stack-form .add-item-button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }

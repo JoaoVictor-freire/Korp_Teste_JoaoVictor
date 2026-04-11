@@ -18,8 +18,13 @@
       </label>
       <label>
         <span>Senha</span>
-        <input type="password" formControlName="password" placeholder="Minimo de 6 caracteres" />
+        <input type="password" formControlName="password" placeholder="Crie uma senha forte" />
       </label>
+      <label>
+        <span>Confirmar senha</span>
+        <input type="password" formControlName="confirmPassword" placeholder="Digite a senha novamente" />
+      </label>
+
       <button type="submit" [disabled]="loading()">
         {{ loading() ? 'Criando...' : 'Criar conta' }}
       </button>

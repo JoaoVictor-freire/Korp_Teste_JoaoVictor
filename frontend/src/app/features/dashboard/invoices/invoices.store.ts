@@ -56,7 +56,7 @@ export class InvoicesStore {
     try {
       this.savingInvoice.set(true);
       this.ui.clearError();
-
+      
       await firstValueFrom(this.invoiceService.create(payload));
       this.ui.showNotice('Nota fiscal criada com sucesso.');
       await this.loadInvoices();

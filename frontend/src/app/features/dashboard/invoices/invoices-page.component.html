@@ -89,8 +89,8 @@
                   [class.selected]="selectedInvoice()?.number === invoice.number"
                   (click)="selectInvoice(invoice.number)">
                   <div>
-                    <strong>NF {{ invoice.number }}</strong>
-                    <span>{{ invoice.status }}</span>
+                    <strong>NF - {{ invoice.number }}</strong>
+                    <span> {{ invoice.status }}</span>
                   </div>
                   <small>{{ invoice.items.length }} item(ns)</small>
                 </button>
