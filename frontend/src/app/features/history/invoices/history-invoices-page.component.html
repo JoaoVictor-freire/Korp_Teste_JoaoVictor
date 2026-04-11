@@ -48,7 +48,7 @@
         <span class="status-pill" [class.closed]="invoice.status === 'CLOSED'">
           {{ invoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}
         </span>
-        <span>{{ invoice.created_at || 'Data indisponivel' }}</span>
+        <span>{{ formatInvoiceDate(invoice.created_at) }}</span>
       </div>
 
       <div class="detail-items">

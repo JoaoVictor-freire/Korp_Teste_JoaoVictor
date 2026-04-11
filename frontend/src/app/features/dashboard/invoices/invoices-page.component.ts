@@ -131,6 +131,19 @@ export class InvoicesPageComponent {
     return `${product.code} - ${product.description}`;
   }
 
+  formatInvoiceDate(value?: string): string {
+    if (!value) {
+      return 'Data indisponivel';
+    }
+
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return 'Data indisponivel';
+    }
+
+    return new Intl.DateTimeFormat('pt-BR').format(parsedDate);
+  }
+
   private createInvoiceItemGroup() {
     return this.fb.nonNullable.group({
       product_code: ['', [Validators.required]],

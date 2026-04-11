@@ -74,6 +74,19 @@ export class HistoryInvoicesPageComponent {
     return `${product.code} - ${product.description}`;
   }
 
+  formatInvoiceDate(value?: string): string {
+    if (!value) {
+      return 'Data indisponivel';
+    }
+
+    const parsedDate = new Date(value);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return 'Data indisponivel';
+    }
+
+    return new Intl.DateTimeFormat('pt-BR').format(parsedDate);
+  }
+
   trackByInvoiceNumber(_: number, invoice: Invoice): number {
     return invoice.number;
   }
