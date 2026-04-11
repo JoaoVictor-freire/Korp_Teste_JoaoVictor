@@ -80,6 +80,17 @@ const billingSwaggerDoc = `{
             "items": {"$ref": "#/components/schemas/Invoice"}
           }
         }
+      },
+      "MessageEnvelope": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "object",
+            "properties": {
+              "message": {"type": "string", "example": "invoice closed successfully"}
+            }
+          }
+        }
       }
     }
   },
@@ -160,6 +171,62 @@ const billingSwaggerDoc = `{
           },
           "409": {
             "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/invoices/{number}/close": {
+      "patch": {
+        "summary": "Close invoice",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {
+            "name": "number",
+            "in": "path",
+            "required": true,
+            "schema": {"type": "integer"}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invoice closed",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/MessageEnvelope"}
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "404": {
+            "description": "Invoice not found",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}
+              }
+            }
+          },
+          "409": {
+            "description": "Invoice already closed",
             "content": {
               "application/json": {
                 "schema": {"$ref": "#/components/schemas/ErrorEnvelope"}

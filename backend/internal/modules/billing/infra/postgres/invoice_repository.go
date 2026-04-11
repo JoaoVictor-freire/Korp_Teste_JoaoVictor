@@ -85,3 +85,55 @@ func (r *InvoiceRepository) ExistsByOwnerAndNumber(ctx context.Context, ownerID 
 
 	return count > 0, nil
 }
+
+func (r *InvoiceRepository) GetByOwnerAndNumber(ctx context.Context, ownerID string, number int) (domain.Invoice, error) {
+	var model InvoiceModel
+	var status string
+
+	err := r.db.WithContext(ctx).
+		Preload("Items").
+		Model(&InvoiceModel{}).
+		Where("idusuario = ? AND numeracao = ?", ownerID, number).
+		First(&model).Error
+
+	if err != nil {
+		return domain.Invoice{}, err
+	}
+
+	if model.Status == true {
+		status = domain.StatusOpen
+	} else {
+		status = domain.StatusClosed
+	}
+
+	items := make([]domain.InvoiceItem, 0, len(model.Items))
+	for _, item := range model.Items {
+		items = append(items, domain.InvoiceItem{
+			ProductCode: item.ProductCode,
+			Quantity:    item.Quantity,
+		})
+	}
+
+	invoice := domain.Invoice{
+		OwnerID:   model.OwnerID,
+		Number:    model.Numeration,
+		Status:    status,
+		Items:     items,
+		CreatedAt: model.CreatedAt,
+	}
+
+	return invoice, nil
+}
+
+func (r *InvoiceRepository) UpdateStatus(ctx context.Context, number int, ownerID string, newStatus bool) error {
+	err := r.db.WithContext(ctx).
+		Model(&InvoiceModel{}).
+		Where("idusuario = ? AND numeracao = ?", ownerID, number).
+		Update("status", newStatus).Error
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

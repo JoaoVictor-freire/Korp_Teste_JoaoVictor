@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 const (
 	StatusOpen   = "OPEN"
@@ -18,4 +21,15 @@ type Invoice struct {
 type InvoiceItem struct {
 	ProductCode string `json:"product_code"`
 	Quantity    int    `json:"quantity"`
+}
+
+var ErrInvoiceAlreadyClosed = errors.New("invoice already closed")
+
+func (i *Invoice) Close() error {
+	if i.Status == StatusClosed {
+		return ErrInvoiceAlreadyClosed
+	}
+	i.Status = StatusClosed
+
+	return nil
 }

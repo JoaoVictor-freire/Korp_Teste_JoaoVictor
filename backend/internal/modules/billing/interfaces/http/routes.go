@@ -23,4 +23,5 @@ func RegisterRoutes(engine *gin.Engine, handler Handler, authMiddleware gin.Hand
 	invoices := v1.Group("/invoices")
 	invoices.POST("", handler.CreateInvoice)
 	invoices.GET("", handler.ListInvoices)
+	invoices.PATCH("/:number/close", handler.CloseInvoice)
 }

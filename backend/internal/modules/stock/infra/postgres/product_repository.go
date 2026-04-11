@@ -64,3 +64,28 @@ func (r *ProductRepository) ExistsByOwnerAndCode(ctx context.Context, ownerID st
 
 	return count > 0, nil
 }
+
+func (r *ProductRepository) GetByOwnerAndCode(ctx context.Context, ownerID string, code string) (domain.Product, error) {
+	var model ProductModel
+	err := r.db.WithContext(ctx).
+		Where("idusuario = ? AND codigo = ?", ownerID, code).
+		First(&model).Error
+	if err != nil {
+		return domain.Product{}, err
+	}
+
+	return domain.Product{
+		OwnerID:     model.OwnerID,
+		Code:        model.Code,
+		Description: model.Description,
+		Stock:       model.Stock,
+		CreatedAt:   model.CreatedAt,
+	}, nil
+}
+
+func (r *ProductRepository) UpdateStock(ctx context.Context, ownerID string, code string, newStock int) error {
+	return r.db.WithContext(ctx).
+		Model(&ProductModel{}).
+		Where("idusuario = ? AND codigo = ?", ownerID, code).
+		Update("saldo", newStock).Error
+}
