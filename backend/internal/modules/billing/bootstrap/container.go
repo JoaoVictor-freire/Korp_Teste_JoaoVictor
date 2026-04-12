@@ -39,7 +39,7 @@ func New() App {
 	productRepository = stockpostgres.NewProductRepository(db)
 
 	handler := billinghttp.NewHandler(
-		application.NewCreateInvoiceUseCase(invoiceRepository),
+		application.NewCreateInvoiceUseCase(invoiceRepository, productRepository),
 		application.NewListInvoicesUseCase(invoiceRepository),
 		application.NewGetInvoiceUseCase(invoiceRepository),
 		application.NewUpdateInvoiceUseCase(invoiceRepository),
