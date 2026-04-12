@@ -61,7 +61,13 @@ export class InvoicesStore {
       this.ui.showNotice('Nota fiscal criada com sucesso.');
       await this.loadInvoices();
     } catch (error: any) {
-      this.ui.setError(error?.error?.error?.message ?? 'Falha ao criar nota.');
+      const message = error?.error?.error?.message ?? 'Falha ao criar nota.';
+      this.ui.setError(message);
+
+      const stockNotification = this.buildStockNotification(payload.number, String(message));
+      if (stockNotification) {
+        this.notifications.addNotification(stockNotification);
+      }
     } finally {
       this.savingInvoice.set(false);
     }

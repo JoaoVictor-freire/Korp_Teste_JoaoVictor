@@ -3,6 +3,7 @@ package application
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"korp_backend/internal/modules/billing/domain"
@@ -27,6 +28,14 @@ type CreateInvoiceInput struct {
 type CreateInvoiceUseCase struct {
 	repository        domain.InvoiceRepository
 	productRepository stockdomain.ProductRepository
+}
+
+type InvoiceOutOfStockError struct {
+	ProductCode string
+}
+
+func (e InvoiceOutOfStockError) Error() string {
+	return fmt.Sprintf("product %s is out of stock", e.ProductCode)
 }
 
 func NewCreateInvoiceUseCase(repository domain.InvoiceRepository, productRepository stockdomain.ProductRepository) CreateInvoiceUseCase {
@@ -57,7 +66,7 @@ func (uc CreateInvoiceUseCase) Execute(ctx context.Context, input CreateInvoiceI
 		}
 
 		if product.Stock < item.Quantity {
-			return domain.Invoice{}, ErrInvoiceWithOutStockProduct
+			return domain.Invoice{}, InvoiceOutOfStockError{ProductCode: item.ProductCode}
 		}
 	}
 

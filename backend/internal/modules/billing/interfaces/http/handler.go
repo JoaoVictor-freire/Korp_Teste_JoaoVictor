@@ -68,12 +68,16 @@ func (h Handler) CreateInvoice(c *gin.Context) {
 		Items:   items,
 	})
 	if err != nil {
+		var outOfStockErr application.InvoiceOutOfStockError
 		switch {
 		case errors.Is(err, application.ErrInvoiceNumberInvalid),
 			errors.Is(err, application.ErrInvoiceItemsRequired),
 			errors.Is(err, application.ErrInvoiceItemCodeRequired),
 			errors.Is(err, application.ErrInvoiceItemQuantityError):
 			httpx.Error(c, http.StatusBadRequest, err.Error())
+			return
+		case errors.As(err, &outOfStockErr):
+			httpx.Error(c, http.StatusConflict, err.Error())
 			return
 		case errors.Is(err, application.ErrInvoiceAlreadyExists):
 			httpx.Error(c, http.StatusConflict, err.Error())
