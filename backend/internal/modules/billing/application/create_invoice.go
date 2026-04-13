@@ -7,16 +7,14 @@ import (
 	"time"
 
 	"korp_backend/internal/modules/billing/domain"
-	stockdomain "korp_backend/internal/modules/stock/domain"
 )
 
 var (
-	ErrInvoiceNumberInvalid       = errors.New("invoice number must be greater than zero")
-	ErrInvoiceItemsRequired       = errors.New("invoice must contain at least one item")
-	ErrInvoiceItemCodeRequired    = errors.New("invoice item product code is required")
-	ErrInvoiceItemQuantityError   = errors.New("invoice item quantity must be greater than zero")
-	ErrInvoiceAlreadyExists       = errors.New("invoice already exists")
-	ErrInvoiceWithOutStockProduct = errors.New("one of your products hasnt stock for the bill")
+	ErrInvoiceNumberInvalid     = errors.New("invoice number must be greater than zero")
+	ErrInvoiceItemsRequired     = errors.New("invoice must contain at least one item")
+	ErrInvoiceItemCodeRequired  = errors.New("invoice item product code is required")
+	ErrInvoiceItemQuantityError = errors.New("invoice item quantity must be greater than zero")
+	ErrInvoiceAlreadyExists     = errors.New("invoice already exists")
 )
 
 type CreateInvoiceInput struct {
@@ -26,8 +24,8 @@ type CreateInvoiceInput struct {
 }
 
 type CreateInvoiceUseCase struct {
-	repository        domain.InvoiceRepository
-	productRepository stockdomain.ProductRepository
+	repository   domain.InvoiceRepository
+	stockService StockService
 }
 
 type InvoiceOutOfStockError struct {
@@ -38,10 +36,18 @@ func (e InvoiceOutOfStockError) Error() string {
 	return fmt.Sprintf("product %s is out of stock", e.ProductCode)
 }
 
-func NewCreateInvoiceUseCase(repository domain.InvoiceRepository, productRepository stockdomain.ProductRepository) CreateInvoiceUseCase {
+type InvoiceProductNotFoundError struct {
+	ProductCode string
+}
+
+func (e InvoiceProductNotFoundError) Error() string {
+	return fmt.Sprintf("product %s was not found in stock", e.ProductCode)
+}
+
+func NewCreateInvoiceUseCase(repository domain.InvoiceRepository, stockService StockService) CreateInvoiceUseCase {
 	return CreateInvoiceUseCase{
-		repository:        repository,
-		productRepository: productRepository,
+		repository:   repository,
+		stockService: stockService,
 	}
 }
 
@@ -60,8 +66,11 @@ func (uc CreateInvoiceUseCase) Execute(ctx context.Context, input CreateInvoiceI
 	}
 
 	for _, item := range input.Items {
-		product, err := uc.productRepository.GetByOwnerAndCode(ctx, input.OwnerID, item.ProductCode)
+		product, err := uc.stockService.GetProduct(ctx, item.ProductCode)
 		if err != nil {
+			if errors.Is(err, ErrStockProductNotFound) {
+				return domain.Invoice{}, InvoiceProductNotFoundError{ProductCode: item.ProductCode}
+			}
 			return domain.Invoice{}, err
 		}
 

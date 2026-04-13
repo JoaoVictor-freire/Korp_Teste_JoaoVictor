@@ -22,12 +22,12 @@ const USER_KEY = 'korp.user';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
-  private readonly tokenState = signal<string | null>(localStorage.getItem(TOKEN_KEY));
-  private readonly userState = signal<User | null>(this.readUser());
+  private readonly tokenState = signal<string | null>(this.readStoredToken());
+  private readonly userState = signal<User | null>(this.readStoredUser());
 
   readonly token = computed(() => this.tokenState());
   readonly user = computed(() => this.userState());
-  readonly isAuthenticated = computed(() => !!this.tokenState());
+  readonly isAuthenticated = computed(() => this.isTokenValid(this.tokenState()));
 
   register(payload: RegisterRequest): Observable<Envelope<AuthPayload>> {
     return this.http
@@ -42,10 +42,7 @@ export class AuthService {
   }
 
   logout(): void {
-    this.tokenState.set(null);
-    this.userState.set(null);
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
+    this.clearSession();
   }
 
   private persistSession(payload: AuthPayload): void {
@@ -55,7 +52,22 @@ export class AuthService {
     localStorage.setItem(USER_KEY, JSON.stringify(payload.user));
   }
 
-  private readUser(): User | null {
+  private readStoredToken(): string | null {
+    const token = localStorage.getItem(TOKEN_KEY);
+    if (!this.isTokenValid(token)) {
+      this.clearStoredSession();
+      return null;
+    }
+
+    return token;
+  }
+
+  private readStoredUser(): User | null {
+    if (!this.isTokenValid(localStorage.getItem(TOKEN_KEY))) {
+      this.clearStoredSession();
+      return null;
+    }
+
     const raw = localStorage.getItem(USER_KEY);
     if (!raw) {
       return null;
@@ -64,7 +76,50 @@ export class AuthService {
     try {
       return JSON.parse(raw) as User;
     } catch {
-      localStorage.removeItem(USER_KEY);
+      this.clearStoredSession();
+      return null;
+    }
+  }
+
+  private clearSession(): void {
+    this.tokenState.set(null);
+    this.userState.set(null);
+    this.clearStoredSession();
+  }
+
+  private clearStoredSession(): void {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
+  }
+
+  private isTokenValid(token: string | null): boolean {
+    if (!token) {
+      return false;
+    }
+
+    const payload = this.decodeJwtPayload(token);
+    if (!payload) {
+      return false;
+    }
+
+    if (typeof payload.exp !== 'number') {
+      return false;
+    }
+
+    return payload.exp * 1000 > Date.now();
+  }
+
+  private decodeJwtPayload(token: string): { exp?: number } | null {
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+
+    try {
+      const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const padded = normalized.padEnd(normalized.length + ((4 - (normalized.length % 4)) % 4), '=');
+      return JSON.parse(atob(padded)) as { exp?: number };
+    } catch {
       return null;
     }
   }
