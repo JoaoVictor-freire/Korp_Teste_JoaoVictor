@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"korp_backend/internal/modules/stock/application"
+	"korp_backend/internal/modules/stock/domain"
 	"korp_backend/internal/platform/auth"
 	"korp_backend/internal/platform/httpx"
 )
@@ -15,21 +16,27 @@ import (
 type Handler struct {
 	createProduct application.CreateProductUseCase
 	listProducts  application.ListProductsUseCase
+	getProduct    application.GetProductUseCase
 	updateProduct application.UpdateProductUseCase
 	deleteProduct application.DeleteProductUseCase
+	decreaseStock application.DecreaseStockUseCase
 }
 
 func NewHandler(
 	createProduct application.CreateProductUseCase,
 	listProducts application.ListProductsUseCase,
+	getProduct application.GetProductUseCase,
 	updateProduct application.UpdateProductUseCase,
 	deleteProduct application.DeleteProductUseCase,
+	decreaseStock application.DecreaseStockUseCase,
 ) Handler {
 	return Handler{
 		createProduct: createProduct,
 		listProducts:  listProducts,
+		getProduct:    getProduct,
 		updateProduct: updateProduct,
 		deleteProduct: deleteProduct,
+		decreaseStock: decreaseStock,
 	}
 }
 
@@ -85,6 +92,37 @@ func (h Handler) ListProducts(c *gin.Context) {
 	}
 
 	httpx.JSON(c, http.StatusOK, products)
+}
+
+func (h Handler) GetProduct(c *gin.Context) {
+	ownerID, ok := auth.UserIDFromContext(c)
+	if !ok {
+		httpx.Error(c, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	code := strings.TrimSpace(c.Param("code"))
+	if code == "" {
+		httpx.Error(c, http.StatusBadRequest, "product code is required")
+		return
+	}
+
+	product, err := h.getProduct.Execute(c.Request.Context(), ownerID, code)
+	if err != nil {
+		switch {
+		case errors.Is(err, application.ErrProductCodeRequired):
+			httpx.Error(c, http.StatusBadRequest, err.Error())
+			return
+		case errors.Is(err, application.ErrProductNotFound):
+			httpx.Error(c, http.StatusNotFound, err.Error())
+			return
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "failed to get product")
+			return
+		}
+	}
+
+	httpx.JSON(c, http.StatusOK, product)
 }
 
 func (h Handler) UpdateProduct(c *gin.Context) {
@@ -165,4 +203,49 @@ func (h Handler) DeleteProduct(c *gin.Context) {
 	httpx.JSON(c, http.StatusOK, gin.H{
 		"message": "product deleted successfully",
 	})
+}
+
+func (h Handler) DecreaseStock(c *gin.Context) {
+	ownerID, ok := auth.UserIDFromContext(c)
+	if !ok {
+		httpx.Error(c, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	code := strings.TrimSpace(c.Param("code"))
+	if code == "" {
+		httpx.Error(c, http.StatusBadRequest, "product code is required")
+		return
+	}
+
+	var request decreaseStockRequest
+	if err := c.ShouldBindJSON(&request); err != nil {
+		httpx.Error(c, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	product, err := h.decreaseStock.Execute(c.Request.Context(), application.DecreaseStockInput{
+		OwnerID:  ownerID,
+		Code:     code,
+		Quantity: request.Quantity,
+	})
+	if err != nil {
+		switch {
+		case errors.Is(err, application.ErrProductCodeRequired),
+			errors.Is(err, application.ErrDecreaseStockQuantityInvalid):
+			httpx.Error(c, http.StatusBadRequest, err.Error())
+			return
+		case errors.Is(err, application.ErrProductNotFound):
+			httpx.Error(c, http.StatusNotFound, err.Error())
+			return
+		case errors.Is(err, domain.ErrInsufficientStock):
+			httpx.Error(c, http.StatusConflict, err.Error())
+			return
+		default:
+			httpx.Error(c, http.StatusInternalServerError, "failed to decrease stock")
+			return
+		}
+	}
+
+	httpx.JSON(c, http.StatusOK, product)
 }

@@ -23,6 +23,8 @@ func RegisterRoutes(engine *gin.Engine, handler Handler, authMiddleware gin.Hand
 	products := v1.Group("/products")
 	products.POST("", handler.CreateProduct)
 	products.GET("", handler.ListProducts)
+	products.GET("/:code", handler.GetProduct)
 	products.PUT("/:code", handler.UpdateProduct)
+	products.PATCH("/:code/decrease", handler.DecreaseStock)
 	products.DELETE("/:code", handler.DeleteProduct)
 }

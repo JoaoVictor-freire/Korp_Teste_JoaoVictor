@@ -46,8 +46,10 @@ func New() App {
 	handler := stockhttp.NewHandler(
 		application.NewCreateProductUseCase(stockRepository),
 		application.NewListProductsUseCase(stockRepository),
+		application.NewGetProductUseCase(stockRepository),
 		application.NewUpdateProductUseCase(stockRepository),
 		application.NewDeleteProductUseCase(stockRepository),
+		application.NewDecreaseStockUseCase(stockRepository),
 	)
 
 	signer := auth.NewTokenSignerFromEnv()

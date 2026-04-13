@@ -9,7 +9,6 @@ import (
 
 	"korp_backend/internal/modules/billing/application"
 	"korp_backend/internal/modules/billing/domain"
-	stockdomain "korp_backend/internal/modules/stock/domain"
 	"korp_backend/internal/platform/auth"
 	"korp_backend/internal/platform/httpx"
 )
@@ -62,12 +61,13 @@ func (h Handler) CreateInvoice(c *gin.Context) {
 		})
 	}
 
-	invoice, err := h.createInvoice.Execute(c.Request.Context(), application.CreateInvoiceInput{
+	invoice, err := h.createInvoice.Execute(application.WithAuthorizationHeader(c.Request.Context(), c.GetHeader("Authorization")), application.CreateInvoiceInput{
 		OwnerID: ownerID,
 		Number:  request.Number,
 		Items:   items,
 	})
 	if err != nil {
+		var productNotFoundErr application.InvoiceProductNotFoundError
 		var outOfStockErr application.InvoiceOutOfStockError
 		switch {
 		case errors.Is(err, application.ErrInvoiceNumberInvalid),
@@ -75,6 +75,14 @@ func (h Handler) CreateInvoice(c *gin.Context) {
 			errors.Is(err, application.ErrInvoiceItemCodeRequired),
 			errors.Is(err, application.ErrInvoiceItemQuantityError):
 			httpx.Error(c, http.StatusBadRequest, err.Error())
+			return
+		case errors.Is(err, application.ErrStockUnauthorized),
+			errors.Is(err, application.ErrStockUnavailable),
+			errors.Is(err, application.ErrStockCircuitOpen):
+			httpx.Error(c, http.StatusBadGateway, err.Error())
+			return
+		case errors.As(err, &productNotFoundErr):
+			httpx.Error(c, http.StatusNotFound, err.Error())
 			return
 		case errors.As(err, &outOfStockErr):
 			httpx.Error(c, http.StatusConflict, err.Error())
@@ -243,7 +251,7 @@ func (h Handler) CloseInvoice(c *gin.Context) {
 		return
 	}
 
-	err = h.closeInvoice.Execute(c.Request.Context(), application.CloseInvoiceInput{
+	err = h.closeInvoice.Execute(application.WithAuthorizationHeader(c.Request.Context(), c.GetHeader("Authorization")), application.CloseInvoiceInput{
 		OwnerID: ownerID,
 		Number:  number,
 	})
@@ -260,10 +268,12 @@ func (h Handler) CloseInvoice(c *gin.Context) {
 		case errors.Is(err, application.ErrCloseInvoiceProductNotFound):
 			httpx.Error(c, http.StatusNotFound, err.Error())
 			return
-		case errors.Is(err, domain.ErrInvoiceAlreadyClosed):
-			httpx.Error(c, http.StatusConflict, err.Error())
+		case errors.Is(err, application.ErrStockUnauthorized),
+			errors.Is(err, application.ErrStockUnavailable),
+			errors.Is(err, application.ErrStockCircuitOpen):
+			httpx.Error(c, http.StatusBadGateway, err.Error())
 			return
-		case errors.Is(err, stockdomain.ErrInsufficientStock):
+		case errors.Is(err, domain.ErrInvoiceAlreadyClosed):
 			httpx.Error(c, http.StatusConflict, err.Error())
 			return
 		case errors.As(err, &insufficientStockErr):

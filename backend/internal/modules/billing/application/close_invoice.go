@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"korp_backend/internal/modules/billing/domain"
-	stockdomain "korp_backend/internal/modules/stock/domain"
 )
 
 var (
@@ -16,8 +15,8 @@ var (
 )
 
 type CloseInvoiceUseCase struct {
-	repository        domain.InvoiceRepository
-	productRepository stockdomain.ProductRepository
+	repository   domain.InvoiceRepository
+	stockService StockService
 }
 
 type CloseInvoiceInput struct {
@@ -33,10 +32,10 @@ func (e InsufficientStockError) Error() string {
 	return fmt.Sprintf("product %s is out of stock", e.ProductCode)
 }
 
-func NewCloseInvoiceUseCase(repository domain.InvoiceRepository, productRepository stockdomain.ProductRepository) CloseInvoiceUseCase {
+func NewCloseInvoiceUseCase(repository domain.InvoiceRepository, stockService StockService) CloseInvoiceUseCase {
 	return CloseInvoiceUseCase{
-		repository:        repository,
-		productRepository: productRepository,
+		repository:   repository,
+		stockService: stockService,
 	}
 }
 
@@ -60,19 +59,14 @@ func (uc CloseInvoiceUseCase) Execute(ctx context.Context, input CloseInvoiceInp
 	}
 
 	for _, item := range invoice.Items {
-		product, err := uc.productRepository.GetByOwnerAndCode(ctx, input.OwnerID, item.ProductCode)
-		if err != nil {
+		err := uc.stockService.DecreaseStock(ctx, item.ProductCode, item.Quantity)
+		if errors.Is(err, ErrStockProductNotFound) {
 			return ErrCloseInvoiceProductNotFound
 		}
-
-		if err := product.DecreaseStock(item.Quantity); err != nil {
-			if errors.Is(err, stockdomain.ErrInsufficientStock) {
-				return InsufficientStockError{ProductCode: item.ProductCode}
-			}
-			return err
+		if errors.Is(err, ErrStockInsufficient) {
+			return InsufficientStockError{ProductCode: item.ProductCode}
 		}
-
-		if err := uc.productRepository.UpdateStock(ctx, input.OwnerID, item.ProductCode, product.Stock); err != nil {
+		if err != nil {
 			return err
 		}
 	}
