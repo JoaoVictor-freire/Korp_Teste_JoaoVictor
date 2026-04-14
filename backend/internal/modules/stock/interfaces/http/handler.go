@@ -4,11 +4,13 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"korp_backend/internal/modules/stock/application"
 	"korp_backend/internal/modules/stock/domain"
+	ai "korp_backend/internal/platform/ai"
 	"korp_backend/internal/platform/auth"
 	"korp_backend/internal/platform/httpx"
 )
@@ -20,6 +22,7 @@ type Handler struct {
 	updateProduct application.UpdateProductUseCase
 	deleteProduct application.DeleteProductUseCase
 	decreaseStock application.DecreaseStockUseCase
+	aiInsights    application.GenerateAIInsightsUseCase
 }
 
 func NewHandler(
@@ -29,6 +32,7 @@ func NewHandler(
 	updateProduct application.UpdateProductUseCase,
 	deleteProduct application.DeleteProductUseCase,
 	decreaseStock application.DecreaseStockUseCase,
+	aiInsights application.GenerateAIInsightsUseCase,
 ) Handler {
 	return Handler{
 		createProduct: createProduct,
@@ -37,6 +41,7 @@ func NewHandler(
 		updateProduct: updateProduct,
 		deleteProduct: deleteProduct,
 		decreaseStock: decreaseStock,
+		aiInsights:    aiInsights,
 	}
 }
 
@@ -248,4 +253,35 @@ func (h Handler) DecreaseStock(c *gin.Context) {
 	}
 
 	httpx.JSON(c, http.StatusOK, product)
+}
+
+func (h Handler) GenerateAIInsights(c *gin.Context) {
+	ownerID, ok := auth.UserIDFromContext(c)
+	if !ok {
+		httpx.Error(c, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	insights, err := h.aiInsights.Execute(c.Request.Context(), ownerID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ai.ErrGeminiNotConfigured):
+			httpx.Error(c, http.StatusServiceUnavailable, "GEMINI_API_KEY is not configured")
+			return
+		default:
+			httpx.Error(c, http.StatusBadGateway, "failed to generate AI insights")
+			return
+		}
+	}
+
+	httpx.JSON(c, http.StatusOK, aiInsightsResponse{
+		GeneratedAt:      insights.GeneratedAt.Format(time.RFC3339),
+		Model:            insights.Model,
+		Content:          insights.Content,
+		ProductCount:     insights.ProductCount,
+		InvoiceCount:     insights.InvoiceCount,
+		OpenInvoiceCount: insights.OpenInvoiceCount,
+		LowStockCount:    insights.LowStockCount,
+		OutOfStockCount:  insights.OutOfStockCount,
+	})
 }
