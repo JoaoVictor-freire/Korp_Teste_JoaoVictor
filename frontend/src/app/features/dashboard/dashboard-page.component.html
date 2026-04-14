@@ -44,6 +44,9 @@
         <a routerLink="/dashboard/history-invoices" routerLinkActive="active" (click)="closeSidebar()">
           <span>Emissão notas</span>
         </a>
+        <a routerLink="/dashboard/insights" routerLinkActive="active" (click)="closeSidebar()">
+          <span>Insights IA</span>
+        </a>
       </nav>
     </aside>
 
@@ -62,45 +65,6 @@
             <span>Notas abertas</span>
             <strong>{{ invoicesStore.openInvoiceCount() }}</strong>
           </article>
-        </section>
-
-        <section class="panel ai-panel">
-          <div class="ai-panel-header">
-            <div>
-              <p class="eyebrow">Insight Operacional</p>
-              <h2>Analise com Gemini</h2>
-            </div>
-
-            <button type="button" class="ghost" (click)="insightsStore.refresh()" [disabled]="insightsStore.loading()">
-              {{ insightsStore.loading() ? 'Gerando...' : 'Gerar novamente' }}
-            </button>
-          </div>
-
-          <div class="ai-stats">
-            <span>{{ stockStore.productCount() }} produtos</span>
-            <span>{{ invoicesStore.invoiceCount() }} notas</span>
-            <span>{{ invoicesStore.openInvoiceCount() }} abertas</span>
-          </div>
-
-          @if (insightsStore.loading() && !insightsStore.hasInsights()) {
-            <p class="empty">Gerando leitura operacional com IA...</p>
-          } @else if (insightsStore.error()) {
-            <div class="ai-error">
-              <p>{{ insightsStore.error() }}</p>
-              <small>Preencha `GEMINI_API_KEY` no `backend/.env` e atualize o dashboard.</small>
-            </div>
-          } @else if (insightsStore.insights(); as insights) {
-            <div class="ai-summary">
-              <div class="ai-meta">
-                <span>Modelo: {{ insights.model }}</span>
-                <span>Estoque baixo: {{ insights.low_stock_count }}</span>
-                <span>Sem estoque: {{ insights.out_of_stock_count }}</span>
-                <span>Atualizado: {{ insightsStore.formattedGeneratedAt() }}</span>
-              </div>
-
-              <pre>{{ insights.content }}</pre>
-            </div>
-          }
         </section>
       }
       <router-outlet />

@@ -1,0 +1,123 @@
+<section class="insights-shell">
+  <header class="insights-header panel">
+    <div>
+      <p class="eyebrow">Insight operacional</p>
+      <h2>Análise com Gemini</h2>
+      <p class="subtitle">Leitura do estoque, faturamento e recomendações pesquisadas na web.</p>
+    </div>
+
+    <button type="button" class="ghost" (click)="insightsStore.refresh()" [disabled]="insightsStore.loading()">
+      {{ insightsStore.loading() ? 'Gerando...' : 'Gerar novamente' }}
+    </button>
+  </header>
+
+  @if (insightsStore.loading() && !insightsStore.hasInsights()) {
+    <section class="panel state-panel">
+      <p class="empty">Gerando leitura operacional com IA...</p>
+    </section>
+  } @else if (insightsStore.error()) {
+    <section class="panel state-panel error-panel">
+      <p>{{ insightsStore.error() }}</p>
+      <small>Tente novamente em instantes.</small>
+    </section>
+  } @else if (insightsStore.insights(); as insights) {
+    <section class="panel insights-summary">
+      <div class="insights-meta">
+        <span>Estoque baixo: {{ insights.low_stock_count }}</span>
+        <span>Sem estoque: {{ insights.out_of_stock_count }}</span>
+        <span>Atualizado: {{ insightsStore.formattedGeneratedAt() }}</span>
+      </div>
+
+      <div class="insights-overview">
+        <h3>Resumo executivo</h3>
+        <p>{{ insights.overview }}</p>
+      </div>
+
+      <div class="insights-grid">
+        <article class="insight-card">
+          <h3>Alertas imediatos</h3>
+          @if (insights.alerts.length) {
+            <ul>
+              @for (item of insights.alerts; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">Sem alertas imediatos.</p>
+          }
+        </article>
+
+        <article class="insight-card">
+          <h3>Oportunidades de ação</h3>
+          @if (insights.actions.length) {
+            <ul>
+              @for (item of insights.actions; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">Sem ações sugeridas no momento.</p>
+          }
+        </article>
+
+        <article class="insight-card">
+          <h3>Faturamento</h3>
+          @if (insights.billing_notes.length) {
+            <ul>
+              @for (item of insights.billing_notes; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+          } @else {
+            <p class="empty">Sem observações adicionais sobre notas.</p>
+          }
+        </article>
+      </div>
+
+      <div class="insights-section">
+        <div class="section-header">
+          <div>
+            <h3>5 produtos em alta para considerar no estoque</h3>
+            <p>Recomendações pesquisadas pela IA com base no mercado e no seu estoque atual.</p>
+          </div>
+        </div>
+
+        <div class="recommendation-grid">
+          @for (item of insights.buy_recommendations; track item.name) {
+            <article class="recommendation-card">
+              <div class="recommendation-top">
+                <strong>{{ item.name }}</strong>
+                <span>{{ item.category }}</span>
+              </div>
+              <p>{{ item.reason }}</p>
+              <div class="recommendation-notes">
+                <small>Mercado: {{ item.market_signal }}</small>
+                <small>Relação com o estoque: {{ item.stock_relation }}</small>
+              </div>
+            </article>
+          }
+        </div>
+      </div>
+
+      @if (insights.sources.length) {
+        <div class="insights-section sources-card">
+        <div class="section-header">
+          <div>
+            <h3>Fontes da pesquisa</h3>
+            <p>Referências usadas pelo Gemini para fundamentar as recomendações.</p>
+          </div>
+        </div>
+
+          <div class="source-list">
+            @for (source of insights.sources; track source.uri) {
+              <a [href]="source.uri" target="_blank" rel="noreferrer">
+                <strong>{{ source.title || source.uri }}</strong>
+                <span>{{ source.uri }}</span>
+              </a>
+            }
+          </div>
+        </div>
+      }
+    </section>
+  }
+</section>
