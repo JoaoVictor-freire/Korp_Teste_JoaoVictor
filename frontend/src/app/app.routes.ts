@@ -10,6 +10,7 @@ import { StockPageComponent } from './features/dashboard/stock/stock-page.compon
 import { InvoicesPageComponent } from './features/dashboard/invoices/invoices-page.component';
 import { HistoryProductsPageComponent } from './features/history/products/history-products-page.component';
 import { HistoryInvoicesPageComponent } from './features/history/invoices/history-invoices-page.component';
+import { InsightsPageComponent } from './features/insights/insights-page.component';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,10 @@ export const routes: Routes = [
       {
         path: 'history-invoices',
         component: HistoryInvoicesPageComponent,
+      },
+      {
+        path: 'insights',
+        component: InsightsPageComponent,
       },
     ],
   },

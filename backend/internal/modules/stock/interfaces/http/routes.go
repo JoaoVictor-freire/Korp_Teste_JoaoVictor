@@ -27,4 +27,6 @@ func RegisterRoutes(engine *gin.Engine, handler Handler, authMiddleware gin.Hand
 	products.PUT("/:code", handler.UpdateProduct)
 	products.PATCH("/:code/decrease", handler.DecreaseStock)
 	products.DELETE("/:code", handler.DeleteProduct)
+
+	v1.GET("/ai/insights", handler.GenerateAIInsights)
 }

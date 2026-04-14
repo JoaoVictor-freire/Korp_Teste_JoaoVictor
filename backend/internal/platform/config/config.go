@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 type HTTPConfig struct {
@@ -45,4 +46,12 @@ func GetEnvAsInt(key string, fallback int) int {
 	}
 
 	return value
+}
+
+func GetEnv(key string, fallback string) string {
+	return getEnv(key, fallback)
+}
+
+func GetEnvTrimmed(key string, fallback string) string {
+	return strings.TrimSpace(getEnv(key, fallback))
 }

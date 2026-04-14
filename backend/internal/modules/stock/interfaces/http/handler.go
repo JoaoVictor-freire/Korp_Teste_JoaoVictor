@@ -4,11 +4,13 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 
 	"korp_backend/internal/modules/stock/application"
 	"korp_backend/internal/modules/stock/domain"
+	ai "korp_backend/internal/platform/ai"
 	"korp_backend/internal/platform/auth"
 	"korp_backend/internal/platform/httpx"
 )
@@ -20,6 +22,7 @@ type Handler struct {
 	updateProduct application.UpdateProductUseCase
 	deleteProduct application.DeleteProductUseCase
 	decreaseStock application.DecreaseStockUseCase
+	aiInsights    application.GenerateAIInsightsUseCase
 }
 
 func NewHandler(
@@ -29,6 +32,7 @@ func NewHandler(
 	updateProduct application.UpdateProductUseCase,
 	deleteProduct application.DeleteProductUseCase,
 	decreaseStock application.DecreaseStockUseCase,
+	aiInsights application.GenerateAIInsightsUseCase,
 ) Handler {
 	return Handler{
 		createProduct: createProduct,
@@ -37,6 +41,7 @@ func NewHandler(
 		updateProduct: updateProduct,
 		deleteProduct: deleteProduct,
 		decreaseStock: decreaseStock,
+		aiInsights:    aiInsights,
 	}
 }
 
@@ -248,4 +253,68 @@ func (h Handler) DecreaseStock(c *gin.Context) {
 	}
 
 	httpx.JSON(c, http.StatusOK, product)
+}
+
+func (h Handler) GenerateAIInsights(c *gin.Context) {
+	ownerID, ok := auth.UserIDFromContext(c)
+	if !ok {
+		httpx.Error(c, http.StatusUnauthorized, "missing auth context")
+		return
+	}
+
+	insights, err := h.aiInsights.Execute(c.Request.Context(), ownerID)
+	if err != nil {
+		switch {
+		case errors.Is(err, ai.ErrGeminiNotConfigured):
+			httpx.Error(c, http.StatusServiceUnavailable, "Servico fora do ar temporariamente")
+			return
+		default:
+			httpx.Error(c, http.StatusBadGateway, "Servico fora do ar temporariamente")
+			return
+		}
+	}
+
+	httpx.JSON(c, http.StatusOK, aiInsightsResponse{
+		GeneratedAt:        insights.GeneratedAt.Format(time.RFC3339),
+		Model:              insights.Model,
+		Overview:           insights.Overview,
+		Alerts:             insights.Alerts,
+		Actions:            insights.Actions,
+		BillingNotes:       insights.BillingNotes,
+		BuyRecommendations: mapRecommendations(insights.BuyRecommendations),
+		SearchQueries:      insights.SearchQueries,
+		Sources:            mapSources(insights.Sources),
+		ProductCount:       insights.ProductCount,
+		InvoiceCount:       insights.InvoiceCount,
+		OpenInvoiceCount:   insights.OpenInvoiceCount,
+		LowStockCount:      insights.LowStockCount,
+		OutOfStockCount:    insights.OutOfStockCount,
+	})
+}
+
+func mapRecommendations(items []ai.BuyRecommendation) []aiRecommendationDTO {
+	result := make([]aiRecommendationDTO, 0, len(items))
+	for _, item := range items {
+		result = append(result, aiRecommendationDTO{
+			Name:          item.Name,
+			Category:      item.Category,
+			Reason:        item.Reason,
+			MarketSignal:  item.MarketSignal,
+			StockRelation: item.StockRelation,
+		})
+	}
+
+	return result
+}
+
+func mapSources(items []ai.GroundingSource) []aiSourceDTO {
+	result := make([]aiSourceDTO, 0, len(items))
+	for _, item := range items {
+		result = append(result, aiSourceDTO{
+			Title: item.Title,
+			URI:   item.URI,
+		})
+	}
+
+	return result
 }
