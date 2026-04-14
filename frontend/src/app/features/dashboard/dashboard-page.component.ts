@@ -8,6 +8,7 @@ import { filter, map, startWith } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
 import { DashboardNotificationsComponent } from './notifications/dashboard-notifications.component';
 import { DashboardNotificationsStore } from './notifications/dashboard-notifications.store';
+import { DashboardInsightsStore } from './dashboard-insights.store';
 import { DashboardUiStore } from './dashboard-ui.store';
 import { InvoicesStore } from './invoices/invoices.store';
 import { StockStore } from './stock/stock.store';
@@ -17,7 +18,7 @@ import { StockStore } from './stock/stock.store';
   imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, MatIconModule, DashboardNotificationsComponent],
   templateUrl: './dashboard-page.component.html',
   styleUrl: './dashboard-page.component.scss',
-  providers: [DashboardUiStore, DashboardNotificationsStore, StockStore, InvoicesStore],
+  providers: [DashboardUiStore, DashboardNotificationsStore, StockStore, InvoicesStore, DashboardInsightsStore],
 })
 export class DashboardPageComponent {
   private readonly authService = inject(AuthService);
@@ -27,6 +28,7 @@ export class DashboardPageComponent {
   readonly ui = inject(DashboardUiStore);
   readonly stockStore = inject(StockStore);
   readonly invoicesStore = inject(InvoicesStore);
+  readonly insightsStore = inject(DashboardInsightsStore);
 
   readonly sidebarOpen = signal(false);
   private readonly currentUrl = toSignal(
@@ -45,7 +47,7 @@ export class DashboardPageComponent {
 
   async refreshAll(): Promise<void> {
     this.ui.clearError();
-    await Promise.all([this.stockStore.refresh(), this.invoicesStore.refresh()]);
+    await Promise.all([this.stockStore.refresh(), this.invoicesStore.refresh(), this.insightsStore.refresh()]);
   }
 
   closeSidebar(): void {
