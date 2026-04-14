@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -104,34 +103,19 @@ func (c *GeminiClient) GenerateOperationalInsights(ctx context.Context, prompt s
 		return GeneratedOperationalInsights{}, "", c.initErr
 	}
 
-	log.Printf("gemini sdk insights start: model=%s prompt_chars=%d timeout_ms=%d", c.model, len(prompt), c.timeoutValue.Milliseconds())
-
 	groundedText, groundingMetadata, err := c.generateGroundedContext(ctx, prompt)
 	if err != nil {
-		log.Printf("gemini sdk grounded request failed: model=%s err=%v", c.model, err)
 		return GeneratedOperationalInsights{}, "", err
 	}
-
-	log.Printf(
-		"gemini sdk grounded request succeeded: model=%s grounded_chars=%d search_queries=%d grounding_chunks=%d",
-		c.model,
-		len(groundedText),
-		countSearchQueries(groundingMetadata),
-		countGroundingChunks(groundingMetadata),
-	)
 
 	jsonPrompt := buildStructuredPrompt(prompt, groundedText)
 	structuredText, err := c.generateStructuredJSON(ctx, jsonPrompt)
 	if err != nil {
-		log.Printf("gemini sdk structured request failed: model=%s err=%v", c.model, err)
 		return GeneratedOperationalInsights{}, "", err
 	}
 
-	log.Printf("gemini sdk structured request succeeded: model=%s json_chars=%d", c.model, len(structuredText))
-
 	structured, err := parseStructuredInsights(structuredText)
 	if err != nil {
-		log.Printf("gemini sdk structured parse failed: %v body=%s", err, truncateForLog(structuredText, 1200))
 		return GeneratedOperationalInsights{}, "", err
 	}
 
@@ -157,15 +141,6 @@ func (c *GeminiClient) GenerateOperationalInsights(ctx context.Context, prompt s
 	}
 
 	result.SearchQueries, result.Sources = extractGroundingMetadata(groundingMetadata)
-	log.Printf(
-		"gemini sdk insights parsed successfully: model=%s alerts=%d actions=%d billing_notes=%d recommendations=%d sources=%d",
-		c.model,
-		len(result.Alerts),
-		len(result.Actions),
-		len(result.BillingNotes),
-		len(result.BuyRecommendations),
-		len(result.Sources),
-	)
 
 	return result, c.model, nil
 }
@@ -201,7 +176,7 @@ func (c *GeminiClient) generateStructuredJSON(ctx context.Context, prompt string
 			"system",
 		),
 		Temperature:      genai.Ptr[float32](0.1),
-		MaxOutputTokens:  2500,
+		MaxOutputTokens:  5000,
 		ResponseMIMEType: "application/json",
 		ResponseSchema:   insightsResponseSchema(),
 		CandidateCount:   1,
@@ -284,7 +259,7 @@ REGRAS:
 - "alerts" deve ter no maximo 3 itens.
 - "actions" deve ter no maximo 3 itens.
 - "billing_notes" deve ter no maximo 2 itens.
-- "buy_recommendations" deve ter exatamente 5 itens.
+- "buy_recommendations" deve ter exatamente 6 itens.
 - Cada item das listas deve ser curto.
 - "reason", "market_signal" e "stock_relation" devem ser curtos.
 - Nao invente dados.
@@ -413,13 +388,6 @@ func sanitizeJSONStringLiterals(value string) string {
 	}
 
 	return builder.String()
-}
-
-func truncateForLog(value string, max int) string {
-	if len(value) <= max {
-		return value
-	}
-	return value[:max] + "...(truncated)"
 }
 
 func countSearchQueries(metadata *genai.GroundingMetadata) int {

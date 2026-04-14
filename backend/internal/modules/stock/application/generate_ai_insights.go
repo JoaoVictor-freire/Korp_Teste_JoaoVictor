@@ -3,7 +3,6 @@ package application
 import (
 	"context"
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 	"time"
@@ -60,47 +59,21 @@ func NewGenerateAIInsightsUseCase(
 }
 
 func (uc GenerateAIInsightsUseCase) Execute(ctx context.Context, ownerID string) (AIInsightsOutput, error) {
-	log.Printf("ai insights usecase: loading products owner_id=%s", ownerID)
 	products, err := uc.productRepository.ListByOwner(ctx, ownerID)
 	if err != nil {
-		log.Printf("ai insights usecase: failed loading products owner_id=%s err=%v", ownerID, err)
 		return AIInsightsOutput{}, err
 	}
 
-	log.Printf("ai insights usecase: loading invoices owner_id=%s", ownerID)
 	invoices, err := uc.invoiceReader.ListByOwner(ctx, ownerID)
 	if err != nil {
-		log.Printf("ai insights usecase: failed loading invoices owner_id=%s err=%v", ownerID, err)
 		return AIInsightsOutput{}, err
 	}
 
 	snapshot := buildInsightSnapshot(products, invoices, uc.lowStockThreshold)
-	log.Printf(
-		"ai insights usecase: snapshot owner_id=%s products=%d invoices=%d open_invoices=%d low_stock=%d out_of_stock=%d prompt_chars=%d",
-		ownerID,
-		len(products),
-		len(invoices),
-		snapshot.openInvoices,
-		snapshot.lowStockCount,
-		snapshot.outOfStockCount,
-		len(snapshot.prompt()),
-	)
 	insights, model, err := uc.generator.GenerateOperationalInsights(ctx, snapshot.prompt())
 	if err != nil {
-		log.Printf("ai insights usecase: generator failed owner_id=%s err=%v", ownerID, err)
 		return AIInsightsOutput{}, err
 	}
-
-	log.Printf(
-		"ai insights usecase: generator succeeded owner_id=%s model=%s alerts=%d actions=%d billing_notes=%d recommendations=%d sources=%d",
-		ownerID,
-		model,
-		len(insights.Alerts),
-		len(insights.Actions),
-		len(insights.BillingNotes),
-		len(insights.BuyRecommendations),
-		len(insights.Sources),
-	)
 
 	return AIInsightsOutput{
 		GeneratedAt:        time.Now().UTC(),
@@ -231,10 +204,10 @@ func (s insightSnapshot) prompt() string {
 		- Em "alerts", retorne no maximo 3 itens.
 		- Em "actions", retorne no maximo 3 itens.
 		- Em "billing_notes", retorne no maximo 2 itens.
-		- Em "buy_recommendations", retorne exatamente 5 itens.
+		- Em "buy_recommendations", retorne exatamente 6 itens.
 		- Em cada recomendacao, "reason", "market_signal" e "stock_relation" devem ter no maximo 14 palavras cada.
 		- Nao invente dados que nao estao no contexto interno.
-		- Para buy_recommendations, pesquise na web com foco no mercado brasileiro atual e recomende exatamente 5 produtos em alta.
+		- Para buy_recommendations, pesquise na web com foco no mercado brasileiro atual e recomende exatamente 6 produtos em alta.
 		- Cada recomendacao deve considerar o que ja existe no estoque e explicar a relacao com o estoque atual.
 		- Se alguma observacao depender de interpretacao, deixe isso claro no texto.
 		- Seja objetivo e util para uma pequena operacao comercial.

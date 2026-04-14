@@ -2,7 +2,6 @@ package http
 
 import (
 	"errors"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -263,10 +262,8 @@ func (h Handler) GenerateAIInsights(c *gin.Context) {
 		return
 	}
 
-	log.Printf("ai insights request started: owner_id=%s", ownerID)
 	insights, err := h.aiInsights.Execute(c.Request.Context(), ownerID)
 	if err != nil {
-		log.Printf("ai insights request failed: owner_id=%s err=%v", ownerID, err)
 		switch {
 		case errors.Is(err, ai.ErrGeminiNotConfigured):
 			httpx.Error(c, http.StatusServiceUnavailable, "Servico fora do ar temporariamente")
@@ -277,15 +274,6 @@ func (h Handler) GenerateAIInsights(c *gin.Context) {
 		}
 	}
 
-	log.Printf(
-		"ai insights request completed: owner_id=%s model=%s products=%d invoices=%d recommendations=%d sources=%d",
-		ownerID,
-		insights.Model,
-		insights.ProductCount,
-		insights.InvoiceCount,
-		len(insights.BuyRecommendations),
-		len(insights.Sources),
-	)
 	httpx.JSON(c, http.StatusOK, aiInsightsResponse{
 		GeneratedAt:        insights.GeneratedAt.Format(time.RFC3339),
 		Model:              insights.Model,
