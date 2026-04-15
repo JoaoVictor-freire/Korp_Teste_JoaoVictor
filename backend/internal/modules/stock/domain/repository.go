@@ -9,5 +9,6 @@ type ProductRepository interface {
 	GetByOwnerAndCode(ctx context.Context, ownerID string, code string) (Product, error)
 	Update(ctx context.Context, originalCode string, product Product) error
 	UpdateStock(ctx context.Context, ownerID string, code string, newStock int) error
+	DecreaseStock(ctx context.Context, ownerID string, code string, quantity int) (bool, error)
 	Delete(ctx context.Context, ownerID string, code string) error
 }

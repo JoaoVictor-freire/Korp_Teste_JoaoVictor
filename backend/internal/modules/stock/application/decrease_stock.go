@@ -39,6 +39,11 @@ func (uc DecreaseStockUseCase) Execute(ctx context.Context, input DecreaseStockI
 		return domain.Product{}, ErrDecreaseStockQuantityInvalid
 	}
 
+	updated, err := uc.repository.DecreaseStock(ctx, input.OwnerID, input.Code, input.Quantity)
+	if err != nil {
+		return domain.Product{}, err
+	}
+
 	product, err := uc.repository.GetByOwnerAndCode(ctx, input.OwnerID, input.Code)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -47,12 +52,8 @@ func (uc DecreaseStockUseCase) Execute(ctx context.Context, input DecreaseStockI
 		return domain.Product{}, err
 	}
 
-	if err := product.DecreaseStock(input.Quantity); err != nil {
-		return domain.Product{}, err
-	}
-
-	if err := uc.repository.UpdateStock(ctx, input.OwnerID, input.Code, product.Stock); err != nil {
-		return domain.Product{}, err
+	if !updated {
+		return domain.Product{}, domain.ErrInsufficientStock
 	}
 
 	return product, nil

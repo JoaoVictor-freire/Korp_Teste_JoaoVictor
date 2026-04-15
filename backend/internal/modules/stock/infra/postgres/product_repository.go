@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"korp_backend/internal/modules/stock/domain"
 )
@@ -99,6 +100,20 @@ func (r *ProductRepository) UpdateStock(ctx context.Context, ownerID string, cod
 		Model(&ProductModel{}).
 		Where("idusuario = ? AND codigo = ?", ownerID, code).
 		Update("saldo", newStock).Error
+}
+
+func (r *ProductRepository) DecreaseStock(ctx context.Context, ownerID string, code string, quantity int) (bool, error) {
+	result := r.db.WithContext(ctx).
+		Model(&ProductModel{}).
+		Clauses(clause.Returning{}).
+		Where("idusuario = ? AND codigo = ? AND saldo >= ?", ownerID, code, quantity).
+		Update("saldo", gorm.Expr("saldo - ?", quantity))
+
+	if result.Error != nil {
+		return false, result.Error
+	}
+
+	return result.RowsAffected > 0, nil
 }
 
 func (r *ProductRepository) Delete(ctx context.Context, ownerID string, code string) error {

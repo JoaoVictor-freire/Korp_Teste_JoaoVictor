@@ -166,17 +166,16 @@ func (r *InvoiceRepository) Update(ctx context.Context, originalNumber int, invo
 	})
 }
 
-func (r *InvoiceRepository) UpdateStatus(ctx context.Context, number int, ownerID string, newStatus bool) error {
-	err := r.db.WithContext(ctx).
+func (r *InvoiceRepository) UpdateStatusIfCurrent(ctx context.Context, number int, ownerID string, currentStatus bool, newStatus bool) (bool, error) {
+	result := r.db.WithContext(ctx).
 		Model(&InvoiceModel{}).
-		Where("idusuario = ? AND numeracao = ?", ownerID, number).
-		Update("status", newStatus).Error
-
-	if err != nil {
-		return err
+		Where("idusuario = ? AND numeracao = ? AND status = ?", ownerID, number, currentStatus).
+		Update("status", newStatus)
+	if result.Error != nil {
+		return false, result.Error
 	}
 
-	return nil
+	return result.RowsAffected > 0, nil
 }
 
 func (r *InvoiceRepository) Delete(ctx context.Context, ownerID string, number int) error {

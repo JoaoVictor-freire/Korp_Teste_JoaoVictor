@@ -58,23 +58,28 @@ func (uc CloseInvoiceUseCase) Execute(ctx context.Context, input CloseInvoiceInp
 		return err
 	}
 
+	claimed, err := uc.repository.UpdateStatusIfCurrent(ctx, invoice.Number, invoice.OwnerID, true, false)
+	if err != nil {
+		return err
+	}
+	if !claimed {
+		return domain.ErrInvoiceAlreadyClosed
+	}
+
 	for _, item := range invoice.Items {
 		err := uc.stockService.DecreaseStock(ctx, item.ProductCode, item.Quantity)
 		if errors.Is(err, ErrStockProductNotFound) {
+			_, _ = uc.repository.UpdateStatusIfCurrent(ctx, invoice.Number, invoice.OwnerID, false, true)
 			return ErrCloseInvoiceProductNotFound
 		}
 		if errors.Is(err, ErrStockInsufficient) {
+			_, _ = uc.repository.UpdateStatusIfCurrent(ctx, invoice.Number, invoice.OwnerID, false, true)
 			return InsufficientStockError{ProductCode: item.ProductCode}
 		}
 		if err != nil {
+			_, _ = uc.repository.UpdateStatusIfCurrent(ctx, invoice.Number, invoice.OwnerID, false, true)
 			return err
 		}
-	}
-
-	newStatus := invoice.Status == domain.StatusOpen
-
-	if err := uc.repository.UpdateStatus(ctx, invoice.Number, invoice.OwnerID, newStatus); err != nil {
-		return err
 	}
 
 	return nil
